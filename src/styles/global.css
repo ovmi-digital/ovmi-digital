@@ -32,6 +32,10 @@
   --color-muted-dark: #9CA3AF;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   font-family: var(--font-sans);
   background-color: var(--color-bg);
