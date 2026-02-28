@@ -1,17 +1,43 @@
 ---
-
+import Base from "../layouts/Base.astro";
+import ThemeToggle from "../components/ThemeToggle.astro";
+import Hero from "../components/Hero.astro";
+import About from "../components/About.astro";
+import Services from "../components/Services.astro";
+import Process from "../components/Process.astro";
+import CaseStudy from "../components/CaseStudy.astro";
+import Contact from "../components/Contact.astro";
+import Footer from "../components/Footer.astro";
 ---
+<Base>
+  <ThemeToggle />
+  <Hero />
+  <About />
+  <Services />
+  <Process />
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+  <CaseStudy
+    name="Lola.pet"
+    tagline="Pet sitting, done right."
+    imageSrc="/images/lola-pet-abstract.webp"
+    imageAlt="Abstract artwork representing Lola.pet"
+    url="https://lola.pet"
+    sections={[
+      {
+        label: "The project",
+        content: "We bought the domain for two reasons. It was perfect. And one of us has a Labrador named Lola. The platform existed. The idea was solid. But the product needed to grow up.",
+      },
+      {
+        label: "What we built",
+        content: "We revamped Lola from the ground up — keeping what worked, replacing what didn't. No more invite gates. Anyone can sign up, find a verified sitter or dog walker, and book — all within the platform. Payments and communication happen in one place. Service providers go through identity verification before their first booking. We also built for the broader community. Pet-friendly places across Romania, public adoption listings, and resources for pet owners who need more than just a sitter.",
+      },
+      {
+        label: "Where it's going",
+        content: "Lola launches in Romania this year. 500+ people already on the waitlist. This is what we do — we find the right idea, build it properly, and ship it.",
+      },
+    ]}
+  />
+
+  <Contact />
+  <Footer />
+</Base>
