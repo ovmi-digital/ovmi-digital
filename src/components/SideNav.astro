@@ -11,7 +11,7 @@ const navLinks = [
 <!-- Desktop nav rail -->
 <nav
   class="fixed top-0 right-0 h-screen w-20 z-40
-         hidden lg:flex flex-col items-center justify-between py-8"
+         hidden lg:flex flex-col items-end justify-between py-8 pr-6"
   aria-label="Section navigation"
 >
   <!-- Theme toggle -->
@@ -34,7 +34,7 @@ const navLinks = [
   </button>
 
   <!-- Section links -->
-  <ul class="flex flex-col items-center gap-6">
+  <ul class="flex flex-col items-end gap-6">
     {navLinks.map((link) => (
       <li>
         <a
@@ -54,7 +54,7 @@ const navLinks = [
   <!-- Email -->
   <a
     href="mailto:hello@ovmi.tech"
-    class="text-[0.6rem] font-bold tracking-wider
+    class="text-sm font-bold tracking-wider
            text-[var(--color-muted)] dark:text-[var(--color-muted-dark)]
            hover:text-[var(--color-accent)] dark:hover:text-[var(--color-accent-dark)]
            transition-colors [writing-mode:vertical-rl] rotate-180"
