@@ -1,0 +1,56 @@
+---
+import "../styles/global.css";
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = "OVMI.DIGITAL — We make things exist.",
+  description = "Ovmi is a small studio based in Europe. We build software, ship products, and integrate AI into everything we do.",
+} = Astro.props;
+---
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <title>{title}</title>
+
+    <link rel="preload" href="/fonts/Satoshi-Variable.woff2" as="font" type="font/woff2" crossorigin />
+
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://ovmi.digital" />
+    <meta property="og:image" content="https://ovmi.digital/images/og-image.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="canonical" href="https://ovmi.digital" />
+    <meta name="robots" content="index, follow" />
+
+    <script type="application/ld+json" set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "OVMI.DIGITAL",
+      "url": "https://ovmi.digital",
+      "logo": "https://ovmi.digital/images/logo-mark.svg",
+      "email": "hello@ovmi.tech",
+      "description": "Small European studio building software, shipping products, and integrating AI.",
+      "foundingDate": "2025",
+      "areaServed": "Worldwide",
+    })} />
+
+    <script is:inline>
+      if (localStorage.getItem("theme") === "dark" ||
+        (!localStorage.getItem("theme") && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
+        document.documentElement.classList.add("dark");
+      }
+    </script>
+  </head>
+  <body class="min-h-screen">
+    <slot />
+  </body>
+</html>

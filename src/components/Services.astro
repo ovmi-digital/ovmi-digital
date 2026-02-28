@@ -1,0 +1,47 @@
+---
+const services = [
+  {
+    title: "Product development",
+    description: "Web and mobile applications, built to last.",
+  },
+  {
+    title: "AI integration & automation",
+    description: "We embed AI into products and workflows. From simple automations to full agent systems.",
+  },
+  {
+    title: "AI consultation",
+    description: "Not sure where AI fits in your business? We'll help you find out — and build a plan that makes sense.",
+  },
+  {
+    title: "Design",
+    description: "Interfaces that work. Aesthetics that hold up.",
+  },
+  {
+    title: "Blockchain development",
+    description: "When the project calls for it, we know how to build it right.",
+  },
+];
+---
+<section class="px-6 md:px-12 lg:px-20" style="padding-top: clamp(6rem, 12vh, 10rem); padding-bottom: clamp(6rem, 12vh, 10rem);">
+  <p class="text-sm font-bold tracking-[0.2em] uppercase mb-6
+            text-[var(--color-muted)] dark:text-[var(--color-muted-dark)]">
+    What We Do
+  </p>
+  <p class="max-w-2xl mb-16">
+    Most clients come to us with an idea or a problem. We help figure out the rest.
+  </p>
+  <p class="max-w-2xl mb-16 text-[var(--color-muted)] dark:text-[var(--color-muted-dark)]">
+    We work across the full stack — web, mobile, design, automation, blockchain,
+    and AI. Not as separate services. As one connected capability.
+  </p>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-12 max-w-4xl">
+    {services.map((service) => (
+      <div>
+        <h3 class="font-bold text-lg mb-2">{service.title}</h3>
+        <p class="text-[var(--color-muted)] dark:text-[var(--color-muted-dark)]">
+          {service.description}
+        </p>
+      </div>
+    ))}
+  </div>
+</section>

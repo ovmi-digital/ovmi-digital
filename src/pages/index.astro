@@ -1,10 +1,50 @@
 ---
-import "../styles/global.css";
+import Base from "../layouts/Base.astro";
+import ThemeToggle from "../components/ThemeToggle.astro";
+import Hero from "../components/Hero.astro";
+import About from "../components/About.astro";
+import Services from "../components/Services.astro";
+import Process from "../components/Process.astro";
+import CaseStudy from "../components/CaseStudy.astro";
+import Contact from "../components/Contact.astro";
+import Footer from "../components/Footer.astro";
 ---
-<html lang="en">
-  <head><meta charset="utf-8" /><title>OVMI.DIGITAL</title></head>
-  <body>
-    <h1 class="text-6xl font-black p-20">We make things exist.</h1>
-    <p class="font-normal p-20">Testing Satoshi font loading.</p>
-  </body>
-</html>
+<Base>
+  <ThemeToggle />
+  <Hero />
+  <About />
+  <Services />
+  <Process />
+
+  <section class="px-6 md:px-12 lg:px-20" style="padding-top: clamp(6rem, 12vh, 10rem);">
+    <p class="text-sm font-bold tracking-[0.2em] uppercase mb-16
+              text-[var(--color-muted)] dark:text-[var(--color-muted-dark)]">
+      Our Work
+    </p>
+  </section>
+
+  <CaseStudy
+    name="Lola.pet"
+    tagline="Pet sitting, done right."
+    imageSrc="/images/lola-pet-abstract.webp"
+    imageAlt="Abstract artwork representing Lola.pet"
+    url="https://lola.pet"
+    sections={[
+      {
+        label: "The project",
+        content: "We bought the domain for two reasons. It was perfect. And one of us has a Labrador named Lola. The platform existed. The idea was solid. But the product needed to grow up.",
+      },
+      {
+        label: "What we built",
+        content: "We revamped Lola from the ground up — keeping what worked, replacing what didn't. No more invite gates. Anyone can sign up, find a verified sitter or dog walker, and book — all within the platform. Payments and communication happen in one place. Service providers go through identity verification before their first booking. We also built for the broader community. Pet-friendly places across Romania, public adoption listings, and resources for pet owners who need more than just a sitter.",
+      },
+      {
+        label: "Where it's going",
+        content: "Lola launches in Romania this year. 500+ people already on the waitlist. This is what we do — we find the right idea, build it properly, and ship it.",
+      },
+    ]}
+  />
+
+  <Contact />
+  <Footer />
+</Base>

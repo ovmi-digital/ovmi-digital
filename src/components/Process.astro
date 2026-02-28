@@ -1,0 +1,48 @@
+---
+const steps = [
+  {
+    title: "Conversation",
+    description: "Every project starts with a conversation. No forms, no briefs — just a discussion about your idea, your problem, and where you want to go.",
+  },
+  {
+    title: "Research",
+    description: "We dig into the space, understand the real pain points, and come back with a clear perspective on what's worth building.",
+  },
+  {
+    title: "Alignment",
+    description: "Features, scope, priorities — nothing gets built without alignment.",
+  },
+  {
+    title: "Build",
+    description: "Through development we keep you close. Early versions, feedback loops, real conversations. No surprises at the finish line.",
+  },
+  {
+    title: "Launch",
+    description: "We help you test, release, and get to market. Then we step back — unless you need us to stay.",
+  },
+];
+---
+<section class="px-6 md:px-12 lg:px-20" style="padding-top: clamp(6rem, 12vh, 10rem); padding-bottom: clamp(6rem, 12vh, 10rem);">
+  <p class="text-sm font-bold tracking-[0.2em] uppercase mb-16
+            text-[var(--color-muted)] dark:text-[var(--color-muted-dark)]">
+    How We Work
+  </p>
+  <div class="max-w-3xl space-y-12">
+    {steps.map((step, i) => (
+      <div class="flex gap-8">
+        <span
+          class="text-2xl font-black text-[var(--color-accent)] dark:text-[var(--color-accent-dark)]
+                 shrink-0 w-12"
+        >
+          {String(i + 1).padStart(2, "0")}
+        </span>
+        <div>
+          <h3 class="font-bold text-lg mb-2">{step.title}</h3>
+          <p class="text-[var(--color-muted)] dark:text-[var(--color-muted-dark)]">
+            {step.description}
+          </p>
+        </div>
+      </div>
+    ))}
+  </div>
+</section>
