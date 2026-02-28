@@ -1,1 +1,58 @@
 @import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@font-face {
+  font-family: "Satoshi";
+  src: url("/fonts/Satoshi-Variable.woff2") format("woff2");
+  font-weight: 300 900;
+  font-display: swap;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Satoshi";
+  src: url("/fonts/Satoshi-VariableItalic.woff2") format("woff2");
+  font-weight: 300 900;
+  font-display: swap;
+  font-style: italic;
+}
+
+@theme {
+  --font-sans: "Satoshi", system-ui, sans-serif;
+
+  --color-bg: #FAFAFA;
+  --color-text: #000000;
+  --color-accent: #E63946;
+  --color-muted: #6B7280;
+
+  --color-bg-dark: #0A0A0A;
+  --color-text-dark: #FAFAFA;
+  --color-accent-dark: #F87171;
+  --color-muted-dark: #9CA3AF;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-size: 1.125rem;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.dark body {
+  background-color: var(--color-bg-dark);
+  color: var(--color-text-dark);
+}
+
+::selection {
+  background-color: var(--color-accent);
+  color: white;
+}
+
+.dark ::selection {
+  background-color: var(--color-accent-dark);
+  color: black;
+}
