@@ -21,12 +21,33 @@ import Footer from "../components/Footer.astro";
 
     <div>
       <CaseStudy
+        name="Turgor"
+        tagline="An open-source brain for autonomous greenhouses."
+        imageSrc="/images/turgor-abstract.webp"
+        imageAlt="Abstract botanical cell symbol over a greenhouse interior"
+        url="https://turgor.garden"
+        imagePosition="right"
+        sections={[
+          {
+            label: "What it is",
+            content: "An AI-powered control system that monitors, decides, and acts — keeping your greenhouse alive while you're away. Raspberry Pi brain, ESP32 sensor nodes, safety-first architecture.",
+          },
+          {
+            label: "Why it matters",
+            content: "Food autonomy shouldn't require a computer science degree. Turgor is open source, runs offline, and puts AI in service of anyone who grows.",
+          },
+        ]}
+      />
+
+      <hr class="mx-6 md:mx-12 lg:mx-20 border-t border-[var(--color-muted)]/20 my-[clamp(6rem,14vh,10rem)]" />
+
+      <CaseStudy
         name="Lola.pet"
         tagline="Pet sitting, done right."
         imageSrc="/images/lola-pet-abstract.webp"
         imageAlt="Abstract artwork representing Lola.pet"
         url="https://lola.pet"
-        imagePosition="right"
+        imagePosition="left"
         sections={[
           {
             label: "The project",
@@ -51,7 +72,7 @@ import Footer from "../components/Footer.astro";
         imageSrc="/images/minio-abstract.webp"
         imageAlt="Abstract artwork featuring the Minio mascot"
         url="https://github.com/micovi/minio"
-        imagePosition="left"
+        imagePosition="right"
         sections={[
           {
             label: "The problem",
