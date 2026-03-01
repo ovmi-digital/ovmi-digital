@@ -22,27 +22,46 @@ const steps = [
   },
 ];
 ---
-<section id="process" class="px-6 md:px-12 lg:px-20" style="padding-top: clamp(6rem, 12vh, 10rem); padding-bottom: clamp(6rem, 12vh, 10rem);">
+<section
+  id="process"
+  class="px-6 md:px-12 lg:px-20"
+  style="padding-top: clamp(6rem, 12vh, 10rem); padding-bottom: clamp(6rem, 12vh, 10rem);"
+>
   <h2 class="text-sm font-bold tracking-[0.2em] uppercase mb-16
             text-[var(--color-muted)] dark:text-[var(--color-muted-dark)]">
     How We Work
   </h2>
-  <div class="max-w-3xl space-y-12">
+
+  <div class="timeline relative max-w-2xl pl-8">
     {steps.map((step, i) => (
-      <div class="flex gap-4 md:gap-8">
-        <span
-          class="text-2xl font-black text-[var(--color-accent)] dark:text-[var(--color-accent-dark)]
-                 shrink-0 w-12"
-        >
-          {String(i + 1).padStart(2, "0")}
-        </span>
-        <div>
-          <h3 class="font-bold text-lg mb-2">{step.title}</h3>
-          <p class="text-[var(--color-muted)] dark:text-[var(--color-muted-dark)]">
-            {step.description}
-          </p>
+      <div class:list={[
+        "timeline-step relative",
+        i < steps.length - 1 ? "pb-8" : "pb-0"
+      ]}>
+        <div class="timeline-dot absolute left-0 top-[3px] w-[10px] h-[10px] rounded-full bg-[var(--color-accent)] dark:bg-[var(--color-accent-dark)] -translate-x-1/2 z-10" />
+        <div class="flex items-baseline gap-3 mb-1">
+          <span class="text-sm font-black text-[var(--color-accent)] dark:text-[var(--color-accent-dark)]">
+            {String(i + 1).padStart(2, "0")}
+          </span>
+          <h3 class="font-bold text-base">{step.title}</h3>
         </div>
+        <p class="text-sm text-[var(--color-muted)] dark:text-[var(--color-muted-dark)]">
+          {step.description}
+        </p>
       </div>
     ))}
   </div>
 </section>
+
+<style>
+  .timeline::before {
+    content: "";
+    position: absolute;
+    top: 5px;
+    bottom: 5px;
+    left: 0;
+    width: 1px;
+    background: var(--color-muted);
+    opacity: 0.2;
+  }
+</style>

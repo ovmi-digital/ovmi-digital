@@ -4,7 +4,6 @@ import SideNav from "../components/SideNav.astro";
 import Hero from "../components/Hero.astro";
 import About from "../components/About.astro";
 import Services from "../components/Services.astro";
-import Process from "../components/Process.astro";
 import CaseStudy from "../components/CaseStudy.astro";
 import Contact from "../components/Contact.astro";
 import Footer from "../components/Footer.astro";
@@ -14,15 +13,13 @@ import Footer from "../components/Footer.astro";
   <Hero />
   <About />
   <Services />
-  <Process />
-
   <section id="work" class="pt-[clamp(6rem,12vh,10rem)]">
     <h2 class="text-sm font-bold tracking-[0.2em] uppercase mb-16 px-6 md:px-12 lg:px-20
               text-[var(--color-muted)] dark:text-[var(--color-muted-dark)]">
       Our Work
     </h2>
 
-    <div class="space-y-[clamp(4rem,8vh,6rem)]">
+    <div>
       <CaseStudy
         name="Lola.pet"
         tagline="Pet sitting, done right."
@@ -46,14 +43,29 @@ import Footer from "../components/Footer.astro";
         ]}
       />
 
+      <hr class="mx-6 md:mx-12 lg:mx-20 border-t border-[var(--color-muted)]/20 my-[clamp(6rem,14vh,10rem)]" />
+
       <CaseStudy
-        name="Coming soon"
-        tagline="Next project in the works."
-        imageSrc="/images/coming-soon-abstract.webp"
-        imageAlt="Abstract artwork for upcoming project"
+        name="MiniO"
+        tagline="Spawn minions that actually finish the job."
+        imageSrc="/images/minio-abstract.webp"
+        imageAlt="Abstract artwork featuring the Minio mascot"
+        url="https://github.com/micovi/minio"
         imagePosition="left"
-        placeholder={true}
-        sections={[]}
+        sections={[
+          {
+            label: "The problem",
+            content: "AI coding agents cut corners. They declare victory while leaving work half-done. They rationalize skipping things — \"these issues were pre-existing\" or \"I'll leave this for a follow-up.\" Anyone running multi-step agent workflows has hit this wall. The agent says it's finished. It isn't.",
+          },
+          {
+            label: "What we built",
+            content: "Minio is a Rust CLI that orchestrates Claude Code agents through development plans. It spawns agents as minions, assigns them tasks, and verifies they actually completed the work. A 4-layer gate catches rationalization: artifact checks confirm expected files exist, an LLM evaluator detects corner-cutting, Claude Code hooks block premature exits, and a circuit breaker stops infinite loops. Agents are defined as simple markdown files — researcher, developer, tester, reviewer — or any custom role you need.",
+          },
+          {
+            label: "How it works",
+            content: "Write a plan as JSON — tasks, dependencies, assigned agents. Run minio run. It handles spawning, sequencing, completion verification, and git commits. If a task fails the gate, it gets sent back with review notes. Ctrl+C saves state; minio resume picks up where you left off. Open source on GitHub.",
+          },
+        ]}
       />
     </div>
   </section>

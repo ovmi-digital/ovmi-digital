@@ -20,6 +20,11 @@ const services = [
     title: "Blockchain development",
     description: "When the project calls for it, we know how to build it right.",
   },
+  {
+    title: "Something else",
+    description: "Got an idea you want to see built?",
+    cta: true,
+  },
 ];
 ---
 <section id="services" class="px-6 md:px-12 lg:px-20" style="padding-top: clamp(6rem, 12vh, 10rem); padding-bottom: clamp(6rem, 12vh, 10rem);">
@@ -39,6 +44,14 @@ const services = [
         <p class="text-[var(--color-muted)] dark:text-[var(--color-muted-dark)]">
           {service.description}
         </p>
+        {service.cta && (
+          <a
+            href="mailto:hello@ovmi.tech"
+            class="inline-block mt-3 text-sm font-bold text-[var(--color-accent)] dark:text-[var(--color-accent-dark)] hover:opacity-70 transition-opacity"
+          >
+            hello@ovmi.tech →
+          </a>
+        )}
       </div>
     ))}
   </div>
