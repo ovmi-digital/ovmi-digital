@@ -4,7 +4,6 @@ import SideNav from "../components/SideNav.astro";
 import Hero from "../components/Hero.astro";
 import About from "../components/About.astro";
 import Services from "../components/Services.astro";
-import Process from "../components/Process.astro";
 import CaseStudy from "../components/CaseStudy.astro";
 import Contact from "../components/Contact.astro";
 import Footer from "../components/Footer.astro";
@@ -14,15 +13,13 @@ import Footer from "../components/Footer.astro";
   <Hero />
   <About />
   <Services />
-  <Process />
-
   <section id="work" class="pt-[clamp(6rem,12vh,10rem)]">
     <h2 class="text-sm font-bold tracking-[0.2em] uppercase mb-16 px-6 md:px-12 lg:px-20
               text-[var(--color-muted)] dark:text-[var(--color-muted-dark)]">
       Our Work
     </h2>
 
-    <div class="space-y-[clamp(4rem,8vh,6rem)]">
+    <div>
       <CaseStudy
         name="Lola.pet"
         tagline="Pet sitting, done right."
@@ -45,6 +42,8 @@ import Footer from "../components/Footer.astro";
           },
         ]}
       />
+
+      <hr class="mx-6 md:mx-12 lg:mx-20 border-t border-[var(--color-muted)]/20 my-[clamp(6rem,14vh,10rem)]" />
 
       <CaseStudy
         name="MiniO"
