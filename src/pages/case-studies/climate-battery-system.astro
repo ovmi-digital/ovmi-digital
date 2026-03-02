@@ -1,1315 +1,1186 @@
 ---
-import Base from "../../layouts/Base.astro";
-import SideNav from "../../components/SideNav.astro";
-import Footer from "../../components/Footer.astro";
-
-const navLinks = [
-  { label: "Simulator", href: "#simulator" },
-  { label: "System", href: "#system-info" },
-  { label: "Cost", href: "#cost" },
-];
+import "../../styles/global.css";
 ---
 
-<Base
-  title="Climate Battery Greenhouse Simulator — OVMI.DIGITAL"
-  description="Interactive 3D simulation of a climate battery system for a 4m × 5m greenhouse. Explore how underground thermal storage keeps plants alive through Romanian winters."
->
-  <SideNav links={navLinks} />
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Interactive 3D simulation of a climate battery system for a 4m x 5m greenhouse. Explore underground thermal storage, airflow patterns, and heat management." />
+    <title>Climate Battery Greenhouse Simulator — Turgor | OVMI.DIGITAL</title>
 
-  <article>
-    <!-- ═══════════════════════════════════════════════════════ HERO -->
-    <header class="flex flex-col justify-between px-6 md:px-12 lg:px-20 pt-8 pb-[clamp(3rem,6vh,5rem)]">
-      <div class="flex items-center gap-3 mb-12">
-        <a href="/" class="flex items-center gap-3 hover:opacity-70 transition-opacity">
-          <img src="/images/logo-mark.svg" alt="" class="h-8 w-8 dark:invert" />
-          <span class="text-sm font-bold tracking-wide uppercase">OVMI</span>
-        </a>
-      </div>
+    <link rel="preload" href="/fonts/Satoshi-Variable.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="canonical" href="https://ovmi.digital/case-studies/climate-battery-system" />
 
-      <div>
-        <p class="text-sm font-bold tracking-[0.2em] uppercase mb-4
-                  text-[var(--color-muted)] dark:text-[var(--color-muted-dark)]">
-          Case Study — Turgor Project
-        </p>
-        <h1
-          class="font-black leading-[0.9] tracking-tight
-                 text-[var(--color-text)] dark:text-[var(--color-text-dark)]"
-          style="font-size: clamp(3rem, 10vw, 10rem);"
-        >
-          Climate Battery
-        </h1>
-        <p class="text-[var(--color-accent)] dark:text-[var(--color-accent-dark)]
-                  font-bold mt-4 text-lg max-w-lg">
-          Underground thermal storage for a 4m × 5m greenhouse. Interactive 3D simulation.
-        </p>
-      </div>
-    </header>
+    <meta property="og:title" content="Climate Battery Greenhouse Simulator — Turgor | OVMI.DIGITAL" />
+    <meta property="og:description" content="Interactive 3D simulation of a climate battery system for a 4m x 5m greenhouse." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://ovmi.digital/case-studies/climate-battery-system" />
+    <meta name="twitter:card" content="summary_large_image" />
 
-    <!-- ═══════════════════════════════════════════════ SIMULATOR -->
-    <section id="simulator" class="relative" style="background: #1a1a2e;">
+    <script is:inline>
+      if (localStorage.getItem("theme") === "dark" ||
+        (!localStorage.getItem("theme") && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
+        document.documentElement.classList.add("dark");
+      }
+    </script>
 
-      <!-- Header bar -->
-      <div id="sim-header" class="flex items-center justify-between px-4 py-3 border-b border-white/10"
-           style="background: #12121f;">
-        <span class="text-white/60 text-xs font-bold tracking-[0.15em] uppercase hidden sm:inline">
-          Climate Battery Greenhouse Simulator
-        </span>
-        <span class="text-white/60 text-xs font-bold tracking-[0.15em] uppercase sm:hidden">
-          Simulator
-        </span>
-        <div class="flex items-center gap-1 bg-white/10 rounded-lg p-0.5">
-          <button id="btn-day" class="px-3 py-1.5 rounded-md text-xs font-bold transition-all duration-300"
-                  style="background: #f59e0b; color: #000;">
-            ☀️ Day
+    <script is:inline type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.162.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.162.0/examples/jsm/"
+      }
+    }
+    </script>
+  </head>
+
+  <body class="m-0 p-0 overflow-hidden" style="background-color: var(--color-bg); color: var(--color-text);">
+    <div id="app" class="flex flex-col h-screen">
+
+      <!-- ═══════════════════════════════════════ HEADER BAR -->
+      <header class="flex items-center justify-between px-4 md:px-6 h-14 shrink-0 border-b"
+              style="border-color: color-mix(in srgb, var(--color-muted) 20%, transparent);">
+        <div class="flex items-center gap-3">
+          <a href="/work/turgor" class="flex items-center gap-2 hover:opacity-70 transition-opacity">
+            <img src="/images/logo-mark.svg" alt="" class="h-6 w-6 dark:invert" />
+            <span class="text-xs font-bold tracking-[0.15em] uppercase hidden sm:inline"
+                  style="color: var(--color-muted);">Turgor</span>
+          </a>
+          <span class="text-xs hidden sm:inline" style="color: var(--color-muted);">/</span>
+          <span class="text-sm font-bold tracking-tight">Climate Battery Simulator</span>
+        </div>
+        <div class="flex items-center gap-1 rounded-lg p-1" style="background: color-mix(in srgb, var(--color-muted) 12%, transparent);">
+          <button id="btn-day" class="mode-btn active px-3 py-1.5 rounded-md text-xs font-bold tracking-wide transition-all" aria-label="Day mode">
+            Day
           </button>
-          <button id="btn-night" class="px-3 py-1.5 rounded-md text-xs font-bold text-white/60 transition-all duration-300">
-            🌙 Night
+          <button id="btn-night" class="mode-btn px-3 py-1.5 rounded-md text-xs font-bold tracking-wide transition-all" aria-label="Night mode">
+            Night
           </button>
         </div>
-      </div>
+      </header>
 
-      <!-- Main content area -->
-      <div class="flex flex-col lg:flex-row" style="min-height: 70vh;">
+      <!-- ═══════════════════════════════════════ MAIN AREA -->
+      <main class="flex flex-col lg:flex-row flex-1 min-h-0">
 
         <!-- 3D Viewport -->
-        <div id="viewport-container" class="relative lg:w-[65%] w-full" style="min-height: 60vh;">
-          <canvas id="sim-canvas" class="w-full h-full block"></canvas>
-          <div id="webgl-fallback" class="hidden absolute inset-0 flex items-center justify-center bg-black/80">
-            <p class="text-white text-center px-8">
-              WebGL is not supported by your browser. Please use a modern browser to view this simulation.
+        <div id="viewport" class="relative lg:w-[65%] h-[55vh] lg:h-auto">
+          <canvas id="canvas"></canvas>
+          <div id="webgl-fallback" class="hidden absolute inset-0 flex items-center justify-center p-8"
+               style="background-color: var(--color-bg);">
+            <p class="text-center max-w-md" style="color: var(--color-muted);">
+              WebGL is not supported in your browser. Please use a modern browser to view the 3D simulation.
             </p>
           </div>
-          <!-- Tooltip -->
-          <div id="tooltip" class="hidden absolute pointer-events-none px-3 py-1.5 rounded-md text-xs font-bold text-white"
-               style="background: rgba(0,0,0,0.8); z-index: 10;">
-          </div>
+          <!-- Floating labels container -->
+          <div id="labels-container" class="absolute inset-0 pointer-events-none overflow-hidden"></div>
         </div>
 
         <!-- Info Panel -->
-        <div id="info-panel" class="lg:w-[35%] w-full overflow-y-auto p-4 space-y-4 border-l border-white/10"
-             style="background: #12121f; max-height: 70vh;">
+        <aside id="info-panel" class="lg:w-[35%] overflow-y-auto p-4 md:p-6 border-l flex flex-col gap-4"
+               style="border-color: color-mix(in srgb, var(--color-muted) 20%, transparent);">
 
           <!-- System Overview -->
-          <div class="rounded-xl p-4 border border-white/10" style="background: #1a1a2e;">
-            <h3 class="text-white/40 text-[0.65rem] font-bold tracking-[0.15em] uppercase mb-3">System Overview</h3>
-            <p class="text-white/80 text-sm leading-relaxed">
-              Greenhouse 4×5m, 8×110mm pipes in 2 layers at 80cm and 120cm depth.
-              12V solar-powered fan with thermostat control.
+          <div class="panel-card rounded-lg p-4" style="background: color-mix(in srgb, var(--color-muted) 8%, transparent);">
+            <h3 class="text-xs font-bold tracking-[0.15em] uppercase mb-3" style="color: var(--color-muted);">System Overview</h3>
+            <p class="text-sm leading-relaxed">
+              4 &times; 5 m greenhouse. 8 &times; 110 mm corrugated pipes in 2 layers at 80 cm and 120 cm depth. 12V solar-powered inline fan. Passive thermal storage in soil mass.
             </p>
           </div>
 
-          <!-- Mode Card -->
-          <div id="mode-card" class="rounded-xl p-4 border border-white/10" style="background: #1a1a2e;">
-            <div id="mode-title" class="text-lg font-bold mb-2" style="color: #f59e0b;">☀️ Storing Heat</div>
-            <div class="grid grid-cols-2 gap-3 text-sm">
+          <!-- Mode Display -->
+          <div id="mode-card" class="panel-card rounded-lg p-4" style="background: color-mix(in srgb, var(--color-muted) 8%, transparent);">
+            <h3 id="mode-title" class="text-base font-black mb-3">Storing Heat</h3>
+            <div class="grid grid-cols-2 gap-3">
               <div>
-                <span class="text-white/40 text-xs block">Outside</span>
-                <span id="temp-outside" class="text-white font-bold text-xl font-mono">-5°C</span>
+                <span class="block text-xs font-bold uppercase tracking-wide" style="color: var(--color-muted);">Outside</span>
+                <span id="temp-outside" class="text-xl font-black tabular-nums">-5°C</span>
               </div>
               <div>
-                <span class="text-white/40 text-xs block">Greenhouse</span>
-                <span id="temp-greenhouse" class="text-white font-bold text-xl font-mono">30°C</span>
+                <span class="block text-xs font-bold uppercase tracking-wide" style="color: var(--color-muted);">Greenhouse</span>
+                <span id="temp-greenhouse" class="text-xl font-black tabular-nums" style="color: #F59E0B;">30°C</span>
               </div>
               <div>
-                <span class="text-white/40 text-xs block">Soil</span>
-                <span id="temp-soil" class="text-white font-bold text-xl font-mono">18°C</span>
+                <span class="block text-xs font-bold uppercase tracking-wide" style="color: var(--color-muted);">Soil Temp</span>
+                <span id="temp-soil" class="text-xl font-black tabular-nums" style="color: #EF4444;">20°C</span>
               </div>
               <div>
-                <span class="text-white/40 text-xs block">Fan</span>
-                <span id="fan-status" class="font-bold text-xl" style="color: #10b981;">ON</span>
+                <span class="block text-xs font-bold uppercase tracking-wide" style="color: var(--color-muted);">Fan</span>
+                <span id="fan-status" class="text-xl font-black">ON</span>
               </div>
             </div>
           </div>
 
           <!-- Time Display -->
-          <div class="rounded-xl p-4 border border-white/10" style="background: #1a1a2e;">
-            <span class="text-white/40 text-xs block mb-1">Time of Day</span>
-            <span id="time-display" class="text-white font-bold text-2xl font-mono">12:00</span>
+          <div class="panel-card rounded-lg p-4" style="background: color-mix(in srgb, var(--color-muted) 8%, transparent);">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold tracking-[0.15em] uppercase" style="color: var(--color-muted);">Time</span>
+              <span id="time-display" class="text-2xl font-black tabular-nums">12:00</span>
+            </div>
           </div>
 
           <!-- Component Details -->
-          <div id="component-details" class="space-y-3">
+          <div class="flex flex-col gap-2">
+            <h3 class="text-xs font-bold tracking-[0.15em] uppercase mt-2" style="color: var(--color-muted);">Components</h3>
 
-            <div id="detail-pipes" class="rounded-xl p-4 border border-white/10 transition-all duration-300" style="background: #1a1a2e;">
-              <h4 class="text-white/40 text-[0.65rem] font-bold tracking-[0.15em] uppercase mb-2">Pipes</h4>
-              <p class="text-white/70 text-sm leading-relaxed">
-                110mm corrugated drainage pipe. 8 runs across 2 layers (4 per layer).
-                50cm spacing between pipes, 50cm from walls. ~40m total length.
-              </p>
-            </div>
+            <details id="detail-pipes" class="panel-card rounded-lg" style="background: color-mix(in srgb, var(--color-muted) 8%, transparent);">
+              <summary class="p-3 text-sm font-bold cursor-pointer hover:opacity-70 transition-opacity">Pipes</summary>
+              <div class="px-3 pb-3 text-sm leading-relaxed" style="color: var(--color-muted);">
+                110 mm corrugated drainage pipe. 8 runs in 2 layers (4 per layer). 50 cm spacing, 50 cm from walls. ~40 m total length. Dark gray, UV-resistant.
+              </div>
+            </details>
 
-            <div id="detail-manifold" class="rounded-xl p-4 border border-white/10 transition-all duration-300" style="background: #1a1a2e;">
-              <h4 class="text-white/40 text-[0.65rem] font-bold tracking-[0.15em] uppercase mb-2">Manifold</h4>
-              <p class="text-white/70 text-sm leading-relaxed">
-                160mm PVC or plywood box (40×60×30cm). Collects all pipes at each end
-                and connects to vertical risers.
-              </p>
-            </div>
+            <details id="detail-manifold" class="panel-card rounded-lg" style="background: color-mix(in srgb, var(--color-muted) 8%, transparent);">
+              <summary class="p-3 text-sm font-bold cursor-pointer hover:opacity-70 transition-opacity">Manifolds</summary>
+              <div class="px-3 pb-3 text-sm leading-relaxed" style="color: var(--color-muted);">
+                160 mm PVC or plywood box 40 &times; 60 &times; 30 cm. One at each end (north and south). Connects all pipe runs to vertical risers.
+              </div>
+            </details>
 
-            <div id="detail-fan" class="rounded-xl p-4 border border-white/10 transition-all duration-300" style="background: #1a1a2e;">
-              <h4 class="text-white/40 text-[0.65rem] font-bold tracking-[0.15em] uppercase mb-2">Fan</h4>
-              <p class="text-white/70 text-sm leading-relaxed">
-                12V inline duct fan, 100–150 m³/h. Gentle airflow is critical — too fast
-                and heat exchange drops. Mounted on north riser.
-              </p>
-            </div>
+            <details id="detail-fan" class="panel-card rounded-lg" style="background: color-mix(in srgb, var(--color-muted) 8%, transparent);">
+              <summary class="p-3 text-sm font-bold cursor-pointer hover:opacity-70 transition-opacity">Fan</summary>
+              <div class="px-3 pb-3 text-sm leading-relaxed" style="color: var(--color-muted);">
+                12V inline duct fan. 100–150 m³/h. Gentle airflow is critical — too fast and heat does not transfer to soil. Mounted in Riser A (north).
+              </div>
+            </details>
 
-            <div id="detail-solar" class="rounded-xl p-4 border border-white/10 transition-all duration-300" style="background: #1a1a2e;">
-              <h4 class="text-white/40 text-[0.65rem] font-bold tracking-[0.15em] uppercase mb-2">Solar Panel</h4>
-              <p class="text-white/70 text-sm leading-relaxed">
-                50W monocrystalline panel mounted on roof ridge. Powers the fan via
-                charge controller and battery. Fully off-grid operation.
-              </p>
-            </div>
+            <details id="detail-solar" class="panel-card rounded-lg" style="background: color-mix(in srgb, var(--color-muted) 8%, transparent);">
+              <summary class="p-3 text-sm font-bold cursor-pointer hover:opacity-70 transition-opacity">Solar Panel</summary>
+              <div class="px-3 pb-3 text-sm leading-relaxed" style="color: var(--color-muted);">
+                50W monocrystalline panel. Mounted on roof. Powers the fan via charge controller and battery. No grid connection needed.
+              </div>
+            </details>
 
-            <div id="detail-battery" class="rounded-xl p-4 border border-white/10 transition-all duration-300" style="background: #1a1a2e;">
-              <h4 class="text-white/40 text-[0.65rem] font-bold tracking-[0.15em] uppercase mb-2">Battery</h4>
-              <p class="text-white/70 text-sm leading-relaxed">
-                12V, 20–40Ah lead-acid or LiFePO4. Keeps the fan running through
-                cloudy spells. Housed in waterproof box on north wall.
-              </p>
-            </div>
+            <details id="detail-battery" class="panel-card rounded-lg" style="background: color-mix(in srgb, var(--color-muted) 8%, transparent);">
+              <summary class="p-3 text-sm font-bold cursor-pointer hover:opacity-70 transition-opacity">Battery</summary>
+              <div class="px-3 pb-3 text-sm leading-relaxed" style="color: var(--color-muted);">
+                12V, 20–40 Ah lead-acid or LiFePO4. Provides buffer for cloudy periods. Mounted on north wall, protected from heat.
+              </div>
+            </details>
 
-            <div id="detail-thermostat" class="rounded-xl p-4 border border-white/10 transition-all duration-300" style="background: #1a1a2e;">
-              <h4 class="text-white/40 text-[0.65rem] font-bold tracking-[0.15em] uppercase mb-2">Thermostat</h4>
-              <p class="text-white/70 text-sm leading-relaxed">
-                W1209 digital controller. Fan ON above 25°C, OFF below 18°C.
-                Prevents unnecessary cycling and saves energy.
-              </p>
-            </div>
+            <details id="detail-thermostat" class="panel-card rounded-lg" style="background: color-mix(in srgb, var(--color-muted) 8%, transparent);">
+              <summary class="p-3 text-sm font-bold cursor-pointer hover:opacity-70 transition-opacity">Thermostat</summary>
+              <div class="px-3 pb-3 text-sm leading-relaxed" style="color: var(--color-muted);">
+                Simple bimetal or digital thermostat. ON above 25°C, OFF below 18°C. Mounted on Riser A near fan.
+              </div>
+            </details>
 
-            <div id="detail-risers" class="rounded-xl p-4 border border-white/10 transition-all duration-300" style="background: #1a1a2e;">
-              <h4 class="text-white/40 text-[0.65rem] font-bold tracking-[0.15em] uppercase mb-2">Risers</h4>
-              <p class="text-white/70 text-sm leading-relaxed">
-                110mm PVC vertical pipes, one at each end. North riser has inline fan
-                (intake during day). South riser is the passive outlet.
-              </p>
-            </div>
+            <details id="detail-risers" class="panel-card rounded-lg" style="background: color-mix(in srgb, var(--color-muted) 8%, transparent);">
+              <summary class="p-3 text-sm font-bold cursor-pointer hover:opacity-70 transition-opacity">Risers</summary>
+              <div class="px-3 pb-3 text-sm leading-relaxed" style="color: var(--color-muted);">
+                110 mm PVC vertical pipes. One per end. Riser A (north) has inline fan. Riser B (south) is open passive return.
+              </div>
+            </details>
           </div>
-        </div>
-      </div>
 
-      <!-- Bottom Controls -->
-      <div class="flex flex-wrap items-center gap-4 px-4 py-3 border-t border-white/10"
-           style="background: #12121f;">
-        <div class="flex items-center gap-2 flex-1 min-w-[200px]">
-          <span class="text-white/40 text-xs font-bold uppercase whitespace-nowrap">Time</span>
-          <input id="time-slider" type="range" min="0" max="24" step="0.1" value="12"
-                 class="flex-1 h-1 rounded-full appearance-none cursor-pointer"
-                 style="accent-color: #f59e0b; background: rgba(255,255,255,0.1);" />
-        </div>
-        <div class="flex items-center gap-2">
-          <button id="btn-cutaway" class="px-3 py-1.5 rounded-md text-xs font-bold text-white transition-all duration-300"
-                  style="background: #10b981;">
+          <!-- Cost Breakdown -->
+          <details class="panel-card rounded-lg" style="background: color-mix(in srgb, var(--color-muted) 8%, transparent);">
+            <summary class="p-3 text-sm font-bold cursor-pointer hover:opacity-70 transition-opacity">
+              Cost Breakdown — 1,500–2,300 RON (~€300–470)
+            </summary>
+            <div class="px-3 pb-3">
+              <table class="w-full text-xs" style="color: var(--color-muted);">
+                <tbody>
+                  <tr class="border-b" style="border-color: color-mix(in srgb, var(--color-muted) 15%, transparent);">
+                    <td class="py-1.5">Corrugated pipe (40m)</td><td class="text-right tabular-nums">300–500 RON</td>
+                  </tr>
+                  <tr class="border-b" style="border-color: color-mix(in srgb, var(--color-muted) 15%, transparent);">
+                    <td class="py-1.5">PVC fittings &amp; risers</td><td class="text-right tabular-nums">100–150 RON</td>
+                  </tr>
+                  <tr class="border-b" style="border-color: color-mix(in srgb, var(--color-muted) 15%, transparent);">
+                    <td class="py-1.5">Inline fan (12V)</td><td class="text-right tabular-nums">80–150 RON</td>
+                  </tr>
+                  <tr class="border-b" style="border-color: color-mix(in srgb, var(--color-muted) 15%, transparent);">
+                    <td class="py-1.5">Thermostat</td><td class="text-right tabular-nums">30–60 RON</td>
+                  </tr>
+                  <tr class="border-b" style="border-color: color-mix(in srgb, var(--color-muted) 15%, transparent);">
+                    <td class="py-1.5">Solar panel (50W)</td><td class="text-right tabular-nums">200–350 RON</td>
+                  </tr>
+                  <tr class="border-b" style="border-color: color-mix(in srgb, var(--color-muted) 15%, transparent);">
+                    <td class="py-1.5">Charge controller</td><td class="text-right tabular-nums">50–100 RON</td>
+                  </tr>
+                  <tr class="border-b" style="border-color: color-mix(in srgb, var(--color-muted) 15%, transparent);">
+                    <td class="py-1.5">Battery (12V 20Ah)</td><td class="text-right tabular-nums">150–300 RON</td>
+                  </tr>
+                  <tr class="border-b" style="border-color: color-mix(in srgb, var(--color-muted) 15%, transparent);">
+                    <td class="py-1.5">Gravel (cap + drainage)</td><td class="text-right tabular-nums">200–350 RON</td>
+                  </tr>
+                  <tr>
+                    <td class="py-1.5">Sealant &amp; tape</td><td class="text-right tabular-nums">30–50 RON</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </details>
+        </aside>
+      </main>
+
+      <!-- ═══════════════════════════════════════ BOTTOM CONTROLS -->
+      <footer class="flex items-center gap-3 px-4 md:px-6 h-14 shrink-0 border-t"
+              style="border-color: color-mix(in srgb, var(--color-muted) 20%, transparent);">
+        <label class="flex items-center gap-2 flex-1 min-w-0">
+          <span class="text-xs font-bold tracking-wide uppercase shrink-0 hidden sm:inline" style="color: var(--color-muted);">Time</span>
+          <input id="time-slider" type="range" min="0" max="1440" value="720" step="1"
+                 class="flex-1 h-1.5 rounded-full appearance-none cursor-pointer"
+                 style="accent-color: var(--color-accent);" />
+        </label>
+        <div class="flex items-center gap-1.5">
+          <button id="btn-cutaway" class="ctrl-btn active px-3 py-1.5 rounded-md text-xs font-bold tracking-wide transition-all" title="Toggle underground cutaway">
             Cutaway
           </button>
-          <button id="btn-labels" class="px-3 py-1.5 rounded-md text-xs font-bold text-white transition-all duration-300"
-                  style="background: #10b981;">
+          <button id="btn-labels" class="ctrl-btn active px-3 py-1.5 rounded-md text-xs font-bold tracking-wide transition-all" title="Toggle 3D labels">
             Labels
           </button>
-          <button id="btn-reset" class="px-3 py-1.5 rounded-md text-xs font-bold text-white/60 transition-all duration-300 hover:text-white"
-                  style="background: rgba(255,255,255,0.1);">
-            Reset View
+          <button id="btn-reset" class="ctrl-btn px-3 py-1.5 rounded-md text-xs font-bold tracking-wide transition-all" title="Reset camera view">
+            Reset
           </button>
         </div>
-      </div>
-    </section>
-
-    <!-- ═══════════════════════════════════════════════ SYSTEM INFO -->
-    <section id="system-info" class="px-6 md:px-12 lg:px-20 py-[clamp(6rem,12vh,10rem)]">
-      <span
-        class="block font-black text-[var(--color-accent)] dark:text-[var(--color-accent-dark)]"
-        style="font-size: clamp(3rem, 6vw, 5rem);"
-      >01</span>
-      <h2
-        class="font-black leading-[1.05] tracking-tight mt-2"
-        style="font-size: clamp(2rem, 4vw, 3.5rem);"
-      >
-        How It Works
-      </h2>
-      <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl">
-        <div>
-          <h3 class="font-bold text-[var(--color-accent)] dark:text-[var(--color-accent-dark)] uppercase tracking-[0.15em] text-sm mb-3">
-            Daytime — Storing Heat
-          </h3>
-          <p class="leading-relaxed max-w-[640px]">
-            Solar energy heats the greenhouse air to 30–35°C. A thermostat-controlled fan
-            pulls the hot air down through the north riser and pushes it through 40 meters
-            of underground pipes. The surrounding soil absorbs the heat, warming from 12°C
-            to over 20°C. Cooled air exits through the south riser at floor level.
-          </p>
-        </div>
-        <div>
-          <h3 class="font-bold text-[var(--color-accent)] dark:text-[var(--color-accent-dark)] uppercase tracking-[0.15em] text-sm mb-3">
-            Nighttime — Releasing Heat
-          </h3>
-          <p class="leading-relaxed max-w-[640px]">
-            After sunset the fan stops. Warm soil radiates heat back through the pipes by
-            natural convection. Warm air rises through the south riser and fills the greenhouse,
-            keeping it 10–15°C warmer than outside. The soil slowly cools from 20°C back to 13°C
-            by morning, ready for the next cycle.
-          </p>
-        </div>
-      </div>
-    </section>
-
-    <!-- ═══════════════════════════════════════════════ PULL QUOTE -->
-    <div class="px-6 md:px-12 lg:px-20 py-[clamp(4rem,10vh,8rem)]">
-      <p
-        class="font-black leading-[1.15] max-w-3xl"
-        style="font-size: clamp(1.75rem, 4vw, 3rem);"
-      >
-        20 square meters of greenhouse.
-        <span class="text-[var(--color-accent)] dark:text-[var(--color-accent-dark)]">
-          Zero energy from the grid.
-        </span>
-      </p>
+      </footer>
     </div>
 
-    <!-- ═══════════════════════════════════════════════ COST -->
-    <section id="cost" class="px-6 md:px-12 lg:px-20 pb-[clamp(6rem,12vh,10rem)]">
-      <span
-        class="block font-black text-[var(--color-accent)] dark:text-[var(--color-accent-dark)]"
-        style="font-size: clamp(3rem, 6vw, 5rem);"
-      >02</span>
-      <h2
-        class="font-black leading-[1.05] tracking-tight mt-2"
-        style="font-size: clamp(2rem, 4vw, 3.5rem);"
-      >
-        Cost Breakdown
-      </h2>
-      <p class="mt-4 mb-8 leading-relaxed max-w-[640px] text-[var(--color-muted)] dark:text-[var(--color-muted-dark)]">
-        Total estimated cost: 1,500–2,300 RON (~€300–470). All materials available locally in Romania.
-      </p>
+    <style is:inline>
+      .dark body { background-color: var(--color-bg-dark); color: var(--color-text-dark); }
 
-      <div class="overflow-x-auto max-w-3xl">
-        <table class="w-full text-sm text-left">
-          <thead>
-            <tr class="border-b border-[var(--color-muted)]/20 dark:border-[var(--color-muted-dark)]/20">
-              <th class="py-3 pr-4 font-bold text-xs uppercase tracking-[0.15em] text-[var(--color-muted)] dark:text-[var(--color-muted-dark)]">Material</th>
-              <th class="py-3 pr-4 font-bold text-xs uppercase tracking-[0.15em] text-[var(--color-muted)] dark:text-[var(--color-muted-dark)]">Qty</th>
-              <th class="py-3 font-bold text-xs uppercase tracking-[0.15em] text-[var(--color-muted)] dark:text-[var(--color-muted-dark)]">Est. Cost (RON)</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-[var(--color-muted)]/10 dark:divide-[var(--color-muted-dark)]/10">
-            <tr><td class="py-2.5 pr-4">Corrugated pipe 110mm</td><td class="py-2.5 pr-4">~50m</td><td class="py-2.5">300–400</td></tr>
-            <tr><td class="py-2.5 pr-4">PVC fittings, elbows, T-joints</td><td class="py-2.5 pr-4">assorted</td><td class="py-2.5">100–150</td></tr>
-            <tr><td class="py-2.5 pr-4">12V inline duct fan</td><td class="py-2.5 pr-4">1</td><td class="py-2.5">80–150</td></tr>
-            <tr><td class="py-2.5 pr-4">W1209 thermostat controller</td><td class="py-2.5 pr-4">1</td><td class="py-2.5">15–25</td></tr>
-            <tr><td class="py-2.5 pr-4">50W monocrystalline solar panel</td><td class="py-2.5 pr-4">1</td><td class="py-2.5">200–300</td></tr>
-            <tr><td class="py-2.5 pr-4">Solar charge controller</td><td class="py-2.5 pr-4">1</td><td class="py-2.5">40–60</td></tr>
-            <tr><td class="py-2.5 pr-4">12V battery (20–40Ah)</td><td class="py-2.5 pr-4">1</td><td class="py-2.5">150–350</td></tr>
-            <tr><td class="py-2.5 pr-4">Gravel (drainage + cap)</td><td class="py-2.5 pr-4">~3m³</td><td class="py-2.5">200–300</td></tr>
-            <tr><td class="py-2.5 pr-4">Sealant, tape, wire</td><td class="py-2.5 pr-4">misc</td><td class="py-2.5">50–80</td></tr>
-            <tr><td class="py-2.5 pr-4">Manifold boxes (plywood)</td><td class="py-2.5 pr-4">2</td><td class="py-2.5">60–100</td></tr>
-            <tr><td class="py-2.5 pr-4">PVC risers 110mm</td><td class="py-2.5 pr-4">2×1.5m</td><td class="py-2.5">30–50</td></tr>
-            <tr class="font-bold border-t-2 border-[var(--color-text)] dark:border-[var(--color-text-dark)]">
-              <td class="py-3 pr-4">Total</td>
-              <td class="py-3 pr-4"></td>
-              <td class="py-3">1,500–2,300</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
-  </article>
+      #canvas { width: 100%; height: 100%; display: block; }
 
-  <Footer />
-
-  <!-- Three.js -->
-  <script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-
-  <script is:inline>
-  (function() {
-    'use strict';
-
-    // ───────────────────────────────── WebGL check
-    var cvs = document.getElementById('sim-canvas');
-    var gl = cvs.getContext('webgl') || cvs.getContext('experimental-webgl');
-    if (!gl) {
-      document.getElementById('webgl-fallback').classList.remove('hidden');
-      return;
-    }
-
-    // ───────────────────────────────── OrbitControls (inline, simplified)
-    function OrbitControls(camera, domElement) {
-      this.camera = camera;
-      this.domElement = domElement;
-      this.target = new THREE.Vector3(0, 0.5, 0);
-      this.minDistance = 3;
-      this.maxDistance = 25;
-      this.enableDamping = true;
-      this.dampingFactor = 0.08;
-      this.rotateSpeed = 0.8;
-      this.panSpeed = 0.5;
-      this.minPolarAngle = 0.1;
-      this.maxPolarAngle = Math.PI / 2 - 0.05;
-
-      var scope = this;
-      var spherical = new THREE.Spherical();
-      var sphericalDelta = new THREE.Spherical();
-      var panOffset = new THREE.Vector3();
-      var isMouseDown = false;
-      var mouseButton = -1;
-      var rotateStart = new THREE.Vector2();
-      var panStart = new THREE.Vector2();
-      var touches = [];
-
-      var offset = new THREE.Vector3();
-      offset.copy(camera.position).sub(scope.target);
-      spherical.setFromVector3(offset);
-
-      this.reset = function(pos, tgt) {
-        scope.target.copy(tgt);
-        camera.position.copy(pos);
-        offset.copy(pos).sub(tgt);
-        spherical.setFromVector3(offset);
-        sphericalDelta.set(0, 0, 0);
-        panOffset.set(0, 0, 0);
-      };
-
-      this.update = function() {
-        offset.copy(camera.position).sub(scope.target);
-        spherical.setFromVector3(offset);
-        spherical.theta += sphericalDelta.theta;
-        spherical.phi += sphericalDelta.phi;
-        spherical.phi = Math.max(scope.minPolarAngle, Math.min(scope.maxPolarAngle, spherical.phi));
-        spherical.radius = Math.max(scope.minDistance, Math.min(scope.maxDistance, spherical.radius + sphericalDelta.radius));
-        scope.target.add(panOffset);
-        offset.setFromSpherical(spherical);
-        camera.position.copy(scope.target).add(offset);
-        camera.lookAt(scope.target);
-
-        if (scope.enableDamping) {
-          sphericalDelta.theta *= (1 - scope.dampingFactor);
-          sphericalDelta.phi *= (1 - scope.dampingFactor);
-          sphericalDelta.radius *= (1 - scope.dampingFactor);
-          panOffset.multiplyScalar(1 - scope.dampingFactor);
-        } else {
-          sphericalDelta.set(0, 0, 0);
-          panOffset.set(0, 0, 0);
-        }
-      };
-
-      function onMouseDown(e) {
-        e.preventDefault();
-        isMouseDown = true;
-        mouseButton = e.button;
-        rotateStart.set(e.clientX, e.clientY);
-        panStart.set(e.clientX, e.clientY);
+      .mode-btn {
+        background: transparent;
+        color: var(--color-muted);
+        border: none;
+        cursor: pointer;
       }
-      function onMouseMove(e) {
-        if (!isMouseDown) return;
-        if (mouseButton === 0) {
-          var dx = (e.clientX - rotateStart.x) / domElement.clientHeight * Math.PI * scope.rotateSpeed;
-          var dy = (e.clientY - rotateStart.y) / domElement.clientHeight * Math.PI * scope.rotateSpeed;
-          sphericalDelta.theta -= dx;
-          sphericalDelta.phi -= dy;
-          rotateStart.set(e.clientX, e.clientY);
-        } else if (mouseButton === 2) {
-          var dx2 = (e.clientX - panStart.x) * scope.panSpeed * 0.01;
-          var dy2 = (e.clientY - panStart.y) * scope.panSpeed * 0.01;
-          var right = new THREE.Vector3();
-          right.setFromMatrixColumn(camera.matrix, 0);
-          var up = new THREE.Vector3();
-          up.setFromMatrixColumn(camera.matrix, 1);
-          panOffset.add(right.multiplyScalar(-dx2));
-          panOffset.add(up.multiplyScalar(dy2));
-          panStart.set(e.clientX, e.clientY);
-        }
+      .mode-btn.active {
+        background: var(--color-text);
+        color: var(--color-bg);
       }
-      function onMouseUp() { isMouseDown = false; mouseButton = -1; }
-      function onWheel(e) {
-        e.preventDefault();
-        sphericalDelta.radius += e.deltaY * 0.005;
+      .dark .mode-btn.active {
+        background: var(--color-text-dark);
+        color: var(--color-bg-dark);
       }
-      function onContextMenu(e) { e.preventDefault(); }
 
-      // Touch support
-      var touchStartDist = 0;
-      function onTouchStart(e) {
-        e.preventDefault();
-        touches = Array.from(e.touches);
-        if (touches.length === 1) {
-          rotateStart.set(touches[0].clientX, touches[0].clientY);
-        } else if (touches.length === 2) {
-          var dx = touches[0].clientX - touches[1].clientX;
-          var dy = touches[0].clientY - touches[1].clientY;
-          touchStartDist = Math.sqrt(dx * dx + dy * dy);
-          panStart.set(
-            (touches[0].clientX + touches[1].clientX) / 2,
-            (touches[0].clientY + touches[1].clientY) / 2
-          );
-        }
+      .ctrl-btn {
+        background: transparent;
+        color: var(--color-muted);
+        border: 1px solid color-mix(in srgb, var(--color-muted) 25%, transparent);
+        cursor: pointer;
       }
-      function onTouchMove(e) {
-        e.preventDefault();
-        var t = Array.from(e.touches);
-        if (t.length === 1) {
-          var dx = (t[0].clientX - rotateStart.x) / domElement.clientHeight * Math.PI * scope.rotateSpeed;
-          var dy = (t[0].clientY - rotateStart.y) / domElement.clientHeight * Math.PI * scope.rotateSpeed;
-          sphericalDelta.theta -= dx;
-          sphericalDelta.phi -= dy;
-          rotateStart.set(t[0].clientX, t[0].clientY);
-        } else if (t.length === 2) {
-          var dx2 = t[0].clientX - t[1].clientX;
-          var dy2 = t[0].clientY - t[1].clientY;
-          var dist = Math.sqrt(dx2 * dx2 + dy2 * dy2);
-          sphericalDelta.radius += (touchStartDist - dist) * 0.02;
-          touchStartDist = dist;
-          var cx = (t[0].clientX + t[1].clientX) / 2;
-          var cy = (t[0].clientY + t[1].clientY) / 2;
-          var pdx = (cx - panStart.x) * scope.panSpeed * 0.01;
-          var pdy = (cy - panStart.y) * scope.panSpeed * 0.01;
-          var right = new THREE.Vector3().setFromMatrixColumn(camera.matrix, 0);
-          var up = new THREE.Vector3().setFromMatrixColumn(camera.matrix, 1);
-          panOffset.add(right.multiplyScalar(-pdx));
-          panOffset.add(up.multiplyScalar(pdy));
-          panStart.set(cx, cy);
-        }
+      .ctrl-btn.active {
+        background: var(--color-text);
+        color: var(--color-bg);
+        border-color: var(--color-text);
       }
-      function onTouchEnd() { touches = []; }
+      .dark .ctrl-btn.active {
+        background: var(--color-text-dark);
+        color: var(--color-bg-dark);
+        border-color: var(--color-text-dark);
+      }
+      .ctrl-btn:hover { opacity: 0.7; }
 
-      domElement.addEventListener('mousedown', onMouseDown);
-      domElement.addEventListener('mousemove', onMouseMove);
-      window.addEventListener('mouseup', onMouseUp);
-      domElement.addEventListener('wheel', onWheel, { passive: false });
-      domElement.addEventListener('contextmenu', onContextMenu);
-      domElement.addEventListener('touchstart', onTouchStart, { passive: false });
-      domElement.addEventListener('touchmove', onTouchMove, { passive: false });
-      domElement.addEventListener('touchend', onTouchEnd);
-    }
+      input[type="range"] {
+        background: color-mix(in srgb, var(--color-muted) 25%, transparent);
+      }
+      input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 14px; height: 14px;
+        border-radius: 50%;
+        background: var(--color-text);
+        cursor: pointer;
+      }
+      .dark input[type="range"]::-webkit-slider-thumb { background: var(--color-text-dark); }
 
-    // ───────────────────────────────── Globals
-    var container = document.getElementById('viewport-container');
-    var canvas = document.getElementById('sim-canvas');
+      details summary { list-style: none; }
+      details summary::-webkit-details-marker { display: none; }
+      details summary::before { content: '+ '; font-weight: 900; margin-right: 0.25rem; }
+      details[open] summary::before { content: '- '; }
 
-    var scene = new THREE.Scene();
-    var camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100);
-    var defaultCamPos = new THREE.Vector3(7, 5, 7);
-    var defaultCamTarget = new THREE.Vector3(0, 0.5, 0);
-    camera.position.copy(defaultCamPos);
-    camera.lookAt(defaultCamTarget);
+      .label-3d {
+        position: absolute;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        white-space: nowrap;
+        padding: 2px 6px;
+        border-radius: 3px;
+        transform: translate(-50%, -50%);
+        pointer-events: none;
+      }
+    </style>
 
-    var renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: false });
-    renderer.setSize(container.clientWidth, container.clientHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.0;
+    <script is:inline type="module">
+      import * as THREE from 'three';
+      import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-    var controls = new OrbitControls(camera, canvas);
+      // ═══════════════════════════════════════════════════════════
+      // CONSTANTS
+      // ═══════════════════════════════════════════════════════════
+      const GH = { w: 4, l: 5, wallH: 2.5, peakH: 3.5 };
+      const PIPE_RADIUS = 0.055;
+      const PIPE_XS = [-1.5, -0.5, 0.5, 1.5];
+      const PIPE_LAYERS = [-0.8, -1.2];
+      const RISER_X = 0;
+      const RISER_NORTH_Z = 2.0;
+      const RISER_SOUTH_Z = -2.0;
+      const PARTICLE_COUNT = 75;
+      const DAY_BG = 0xE8F4FD;
+      const NIGHT_BG = 0x0F172A;
 
-    // State
-    var isDay = true;
-    var timeOfDay = 12;
-    var showCutaway = true;
-    var showLabels = true;
-    var fanAngle = 0;
-    var transitionProgress = 1; // 0 = night, 1 = day
-    var targetTransition = 1;
+      // ═══════════════════════════════════════════════════════════
+      // STATE
+      // ═══════════════════════════════════════════════════════════
+      let isDay = true;
+      let timeMinutes = 720; // 12:00
+      let showCutaway = true;
+      let showLabels = true;
+      let transitionProgress = 1; // 1 = day, 0 = night
+      let transitioning = false;
+      let transitionTarget = 1;
 
-    // Groups
-    var greenhouseGroup = new THREE.Group();
-    var undergroundGroup = new THREE.Group();
-    var cutawayFillGroup = new THREE.Group();
-    var componentGroup = new THREE.Group();
-    var labelGroup = new THREE.Group();
-    var particleGroup = new THREE.Group();
-    scene.add(greenhouseGroup);
-    scene.add(undergroundGroup);
-    scene.add(cutawayFillGroup);
-    scene.add(componentGroup);
-    scene.add(labelGroup);
-    scene.add(particleGroup);
+      // Temperature model data points [minute, outside, greenhouse, soil, fanOn]
+      const TEMP_DATA = [
+        [0,    -8,   7,   16, false],
+        [240,  -7,   5,   13, false],
+        [360,  -5,   6,   12, false],
+        [480,  -3,  25,   14, true],
+        [600,  -2,  30,   17, true],
+        [720,   0,  33,   20, true],
+        [840,  -1,  30,   21, true],
+        [960,  -3,  25,   20, true],
+        [1020, -4,  20,   19, true],
+        [1080, -5,  12,   18, false],
+        [1200, -7,   9,   17, false],
+        [1320, -8,   7,   16, false],
+        [1440, -8,   7,   16, false],
+      ];
 
-    // Clickable objects for raycasting
-    var clickableObjects = [];
-    var componentMap = {};
+      // ═══════════════════════════════════════════════════════════
+      // WEBGL CHECK
+      // ═══════════════════════════════════════════════════════════
+      const canvasEl = document.getElementById('canvas');
+      const gl = canvasEl.getContext('webgl2') || canvasEl.getContext('webgl');
+      if (!gl) {
+        document.getElementById('webgl-fallback').classList.remove('hidden');
+        throw new Error('WebGL not supported');
+      }
 
-    // ───────────────────────────────── Materials
-    var glassMat = new THREE.MeshPhysicalMaterial({
-      color: 0xddeeff,
-      transparent: true,
-      opacity: 0.25,
-      roughness: 0.05,
-      metalness: 0,
-      side: THREE.DoubleSide,
-      depthWrite: false
-    });
+      // ═══════════════════════════════════════════════════════════
+      // THREE.JS SETUP
+      // ═══════════════════════════════════════════════════════════
+      const viewport = document.getElementById('viewport');
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color(DAY_BG);
 
-    var frameMat = new THREE.MeshStandardMaterial({
-      color: 0x999999,
-      metalness: 0.8,
-      roughness: 0.3
-    });
-
-    var floorMat = new THREE.MeshStandardMaterial({ color: 0xbbbbaa, roughness: 0.9 });
-    var soilDarkMat = new THREE.MeshStandardMaterial({ color: 0x4a3728, roughness: 1 });
-    var soilDeepMat = new THREE.MeshStandardMaterial({ color: 0x3d2b1f, roughness: 1 });
-    var gravelMat = new THREE.MeshStandardMaterial({ color: 0x9a9a8a, roughness: 1 });
-    var pipeMat = new THREE.MeshStandardMaterial({ color: 0x444444, roughness: 0.7 });
-    var manifoldMat = new THREE.MeshStandardMaterial({ color: 0xb08860, roughness: 0.8 });
-    var pvcMat = new THREE.MeshStandardMaterial({ color: 0xcccccc, roughness: 0.4 });
-    var solarMat = new THREE.MeshStandardMaterial({ color: 0x1a3a5c, metalness: 0.6, roughness: 0.3 });
-    var batteryMat = new THREE.MeshStandardMaterial({ color: 0x333333, roughness: 0.6 });
-    var thermostatMat = new THREE.MeshStandardMaterial({ color: 0x558855, roughness: 0.5 });
-    var fanMat = new THREE.MeshStandardMaterial({ color: 0x666666, metalness: 0.5, roughness: 0.4 });
-
-    // Soil emissive for heat glow
-    var soilGlowMats = [];
-
-    // ───────────────────────────────── Build Greenhouse
-    // Dimensions: 4m wide (X), 5m long (Z), 2.5m walls, 3.5m peak
-    var GW = 4, GL = 5, WH = 2.5, PH = 3.5;
-    var HW = GW / 2, HL = GL / 2;
-    var BEAM = 0.04;
-
-    function addFrame(x, y, z, w, h, d) {
-      var g = new THREE.BoxGeometry(w, h, d);
-      var m = new THREE.Mesh(g, frameMat);
-      m.position.set(x, y, z);
-      m.castShadow = true;
-      greenhouseGroup.add(m);
-    }
-
-    // Floor
-    (function() {
-      var fg = new THREE.PlaneGeometry(GW, GL);
-      var fm = new THREE.Mesh(fg, floorMat);
-      fm.rotation.x = -Math.PI / 2;
-      fm.receiveShadow = true;
-      greenhouseGroup.add(fm);
-    })();
-
-    // Wall glass panels
-    function addWallGlass(px, py, pz, w, h, ry) {
-      var g = new THREE.PlaneGeometry(w, h);
-      var m = new THREE.Mesh(g, glassMat);
-      m.position.set(px, py, pz);
-      m.rotation.y = ry;
-      greenhouseGroup.add(m);
-    }
-
-    // Long walls (along Z)
-    addWallGlass(-HW, WH / 2, 0, GL, WH, Math.PI / 2);  // West
-    addWallGlass(HW, WH / 2, 0, GL, WH, -Math.PI / 2);  // East
-
-    // Short walls - lower rect (along X)
-    addWallGlass(0, WH / 2, -HL, GW, WH, 0);   // North
-    addWallGlass(0, WH / 2, HL, GW, WH, Math.PI); // South
-
-    // Gable triangles
-    function addGable(z, ry) {
-      var shape = new THREE.Shape();
-      shape.moveTo(-HW, WH);
-      shape.lineTo(0, PH);
-      shape.lineTo(HW, WH);
-      shape.closePath();
-      var sg = new THREE.ShapeGeometry(shape);
-      var sm = new THREE.Mesh(sg, glassMat);
-      sm.position.set(0, 0, z);
-      sm.rotation.y = ry;
-      greenhouseGroup.add(sm);
-    }
-    addGable(-HL, 0);
-    addGable(HL, Math.PI);
-
-    // Roof panels
-    var roofAngle = Math.atan2(PH - WH, HW);
-    var roofLen = Math.sqrt((PH - WH) * (PH - WH) + HW * HW);
-    function addRoof(side) {
-      var rg = new THREE.PlaneGeometry(roofLen, GL);
-      var rm = new THREE.Mesh(rg, glassMat);
-      var cx = side * HW / 2;
-      var cy = WH + (PH - WH) / 2;
-      rm.position.set(cx, cy, 0);
-      rm.rotation.z = side * roofAngle;
-      rm.rotation.order = 'ZXY';
-      greenhouseGroup.add(rm);
-    }
-    addRoof(-1); // West roof
-    addRoof(1);  // East roof
-
-    // Frame beams - vertical corners
-    [[-HW, -HL], [HW, -HL], [HW, HL], [-HW, HL]].forEach(function(p) {
-      addFrame(p[0], WH / 2, p[1], BEAM, WH, BEAM);
-    });
-    // Frame beams - horizontal bottom edges
-    addFrame(0, 0, -HL, GW, BEAM, BEAM);
-    addFrame(0, 0, HL, GW, BEAM, BEAM);
-    addFrame(-HW, 0, 0, BEAM, BEAM, GL);
-    addFrame(HW, 0, 0, BEAM, BEAM, GL);
-    // Top wall edges
-    addFrame(0, WH, -HL, GW, BEAM, BEAM);
-    addFrame(0, WH, HL, GW, BEAM, BEAM);
-    addFrame(-HW, WH, 0, BEAM, BEAM, GL);
-    addFrame(HW, WH, 0, BEAM, BEAM, GL);
-    // Ridge beam
-    addFrame(0, PH, 0, BEAM, BEAM, GL);
-    // Roof edge beams
-    [[-1, -HL], [-1, HL], [1, -HL], [1, HL]].forEach(function(p) {
-      var rx = p[0] * HW / 2;
-      var ry2 = WH + (PH - WH) / 2;
-      addFrame(rx, ry2, p[1], BEAM, BEAM, BEAM);
-    });
-    // Gable peaks
-    addFrame(0, (WH + PH) / 2, -HL, BEAM, PH - WH, BEAM);
-    addFrame(0, (WH + PH) / 2, HL, BEAM, PH - WH, BEAM);
-
-    // ───────────────────────────────── Underground
-    // Soil layer helper: creates L-shape (3/4) + cutaway piece (1/4)
-    // Cutaway quarter: x > 0, z > 0
-    var SOIL_LAYERS = [
-      { yTop: 0, thick: 0.20, mat: gravelMat },      // Gravel cap
-      { yTop: -0.20, thick: 0.45, mat: soilDarkMat },  // Backfill 1
-      { yTop: -0.65, thick: 0.40, mat: soilDarkMat },  // Backfill 2 (contains pipe layer 1 at -0.80)
-      { yTop: -1.05, thick: 0.30, mat: soilDarkMat },  // Around pipe layer 2 at -1.20
-      { yTop: -1.35, thick: 0.15, mat: gravelMat },    // Gravel drainage
-      { yTop: -1.50, thick: 0.30, mat: soilDeepMat }   // Undisturbed earth
-    ];
-
-    SOIL_LAYERS.forEach(function(layer) {
-      var t = layer.thick;
-      var yMid = layer.yTop - t / 2;
-
-      // Make glow-capable copies for soil layers
-      var mat = layer.mat.clone();
-      soilGlowMats.push(mat);
-
-      // Left half (x: -HW to 0, z: -HL to HL) — always visible
-      var g1 = new THREE.BoxGeometry(HW, t, GL);
-      var m1 = new THREE.Mesh(g1, mat);
-      m1.position.set(-HW / 2, yMid, 0);
-      m1.receiveShadow = true;
-      undergroundGroup.add(m1);
-
-      // Right-back (x: 0 to HW, z: -HL to 0) — always visible
-      var g2 = new THREE.BoxGeometry(HW, t, HL);
-      var m2 = new THREE.Mesh(g2, mat);
-      m2.position.set(HW / 2, yMid, -HL / 2);
-      m2.receiveShadow = true;
-      undergroundGroup.add(m2);
-
-      // Cutaway piece (x: 0 to HW, z: 0 to HL) — toggled
-      var g3 = new THREE.BoxGeometry(HW, t, HL);
-      var m3 = new THREE.Mesh(g3, mat);
-      m3.position.set(HW / 2, yMid, HL / 2);
-      m3.receiveShadow = true;
-      cutawayFillGroup.add(m3);
-    });
-
-    cutawayFillGroup.visible = false; // Cutaway on by default
-
-    // Cross-section wall (visible face at the cut)
-    var wallMat = new THREE.MeshStandardMaterial({ color: 0x5a4030, roughness: 1 });
-    // X-facing wall (at x=0, z: 0 to HL)
-    var cw1 = new THREE.Mesh(new THREE.PlaneGeometry(HL, 1.8), wallMat);
-    cw1.position.set(0, -0.9, HL / 2);
-    cw1.rotation.y = Math.PI / 2;
-    undergroundGroup.add(cw1);
-    // Z-facing wall (at z=0, x: 0 to HW)
-    var cw2 = new THREE.Mesh(new THREE.PlaneGeometry(HW, 1.8), wallMat);
-    cw2.position.set(HW / 2, -0.9, 0);
-    undergroundGroup.add(cw2);
-
-    // Pipes: 8 total, 4 per layer
-    var PIPE_RADIUS = 0.055;
-    var PIPE_POSITIONS_X = [-1.25, -0.42, 0.42, 1.25];
-    var PIPE_Y = [-0.80, -1.20]; // Two layers
-
-    PIPE_Y.forEach(function(y) {
-      PIPE_POSITIONS_X.forEach(function(x) {
-        var pg = new THREE.CylinderGeometry(PIPE_RADIUS, PIPE_RADIUS, GL - 0.2, 12);
-        pg.rotateX(Math.PI / 2);
-        var pm = new THREE.Mesh(pg, pipeMat);
-        pm.position.set(x, y, 0);
-        pm.castShadow = true;
-        undergroundGroup.add(pm);
-        clickableObjects.push(pm);
-        componentMap[pm.id] = 'pipes';
-      });
-    });
-
-    // Manifold boxes (2, at north and south ends)
-    function addManifold(z) {
-      var mg = new THREE.BoxGeometry(0.6, 0.3, 0.4);
-      var mm = new THREE.Mesh(mg, manifoldMat);
-      mm.position.set(0, -1.0, z);
-      mm.castShadow = true;
-      undergroundGroup.add(mm);
-      clickableObjects.push(mm);
-      componentMap[mm.id] = 'manifold';
-    }
-    addManifold(-HL + 0.2);  // North
-    addManifold(HL - 0.2);   // South
-
-    // Risers (vertical PVC pipes from manifolds through floor)
-    var riserNorthGroup = new THREE.Group();
-    var riserSouthGroup = new THREE.Group();
-
-    function addRiser(z, group) {
-      var rg = new THREE.CylinderGeometry(PIPE_RADIUS, PIPE_RADIUS, 1.5, 12);
-      var rm = new THREE.Mesh(rg, pvcMat);
-      rm.position.set(0, -0.25, z);
-      rm.castShadow = true;
-      group.add(rm);
-      clickableObjects.push(rm);
-      componentMap[rm.id] = 'risers';
-    }
-
-    addRiser(-HL + 0.3, riserNorthGroup);
-    addRiser(HL - 0.3, riserSouthGroup);
-    componentGroup.add(riserNorthGroup);
-    componentGroup.add(riserSouthGroup);
-
-    // Fan (on north riser)
-    var fanGroup = new THREE.Group();
-    var fanBody = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.08, 0.08, 0.12, 16),
-      fanMat
-    );
-    fanBody.position.set(0, 0.4, -HL + 0.3);
-    fanGroup.add(fanBody);
-
-    // Fan blades
-    var fanBladesGroup = new THREE.Group();
-    fanBladesGroup.position.copy(fanBody.position);
-    for (var b = 0; b < 4; b++) {
-      var blade = new THREE.Mesh(
-        new THREE.BoxGeometry(0.06, 0.005, 0.02),
-        fanMat
+      const camera = new THREE.PerspectiveCamera(
+        45,
+        viewport.clientWidth / viewport.clientHeight,
+        0.1,
+        100
       );
-      blade.position.x = 0.04;
-      blade.rotation.y = (b * Math.PI) / 2;
-      var bladePivot = new THREE.Group();
-      bladePivot.add(blade);
-      bladePivot.rotation.y = (b * Math.PI) / 2;
-      fanBladesGroup.add(bladePivot);
-    }
-    fanGroup.add(fanBladesGroup);
-    componentGroup.add(fanGroup);
-    clickableObjects.push(fanBody);
-    componentMap[fanBody.id] = 'fan';
+      camera.position.set(7, 5, -7);
 
-    // Solar panel (on roof)
-    var solarGeo = new THREE.BoxGeometry(0.8, 0.03, 1.2);
-    var solarMesh = new THREE.Mesh(solarGeo, solarMat);
-    solarMesh.position.set(-0.6, PH - 0.15, 0);
-    solarMesh.rotation.z = Math.atan2(PH - WH, HW);
-    solarMesh.castShadow = true;
-    componentGroup.add(solarMesh);
-    clickableObjects.push(solarMesh);
-    componentMap[solarMesh.id] = 'solar';
-
-    // Battery box (north wall inside)
-    var batteryGeo = new THREE.BoxGeometry(0.25, 0.2, 0.15);
-    var batteryMesh = new THREE.Mesh(batteryGeo, batteryMat);
-    batteryMesh.position.set(-1.5, 0.15, -HL + 0.15);
-    batteryMesh.castShadow = true;
-    componentGroup.add(batteryMesh);
-    clickableObjects.push(batteryMesh);
-    componentMap[batteryMesh.id] = 'battery';
-
-    // Thermostat (small box on north riser)
-    var thermoGeo = new THREE.BoxGeometry(0.06, 0.08, 0.03);
-    var thermoMesh = new THREE.Mesh(thermoGeo, thermostatMat);
-    thermoMesh.position.set(0.1, 0.3, -HL + 0.3);
-    componentGroup.add(thermoMesh);
-    clickableObjects.push(thermoMesh);
-    componentMap[thermoMesh.id] = 'thermostat';
-
-    // ───────────────────────────────── Labels (CSS2D-like using sprites)
-    function makeLabel(text, position) {
-      var canvas2d = document.createElement('canvas');
-      var ctx = canvas2d.getContext('2d');
-      canvas2d.width = 256;
-      canvas2d.height = 64;
-      ctx.fillStyle = 'rgba(0,0,0,0.7)';
-      ctx.roundRect(0, 0, 256, 64, 8);
-      ctx.fill();
-      ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 22px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(text, 128, 32);
-
-      var tex = new THREE.CanvasTexture(canvas2d);
-      var spriteMat = new THREE.SpriteMaterial({ map: tex, depthTest: false, transparent: true });
-      var sprite = new THREE.Sprite(spriteMat);
-      sprite.position.copy(position);
-      sprite.scale.set(1.2, 0.3, 1);
-      labelGroup.add(sprite);
-      return sprite;
-    }
-
-    makeLabel('Pipes (Layer 1)', new THREE.Vector3(0, -0.5, 1.5));
-    makeLabel('Pipes (Layer 2)', new THREE.Vector3(0, -1.0, 1.5));
-    makeLabel('North Manifold', new THREE.Vector3(0, -0.6, -HL + 0.2));
-    makeLabel('South Manifold', new THREE.Vector3(0, -0.6, HL - 0.2));
-    makeLabel('Fan + Riser (N)', new THREE.Vector3(0, 0.7, -HL + 0.3));
-    makeLabel('Riser (S)', new THREE.Vector3(0, 0.7, HL - 0.3));
-    makeLabel('Solar Panel', new THREE.Vector3(-0.6, PH + 0.2, 0));
-    makeLabel('Battery', new THREE.Vector3(-1.5, 0.5, -HL + 0.15));
-    makeLabel('Thermostat', new THREE.Vector3(0.3, 0.55, -HL + 0.3));
-    makeLabel('Gravel Cap', new THREE.Vector3(-1, -0.1, 1.5));
-    makeLabel('Gravel Drain', new THREE.Vector3(-1, -1.4, 1.5));
-
-    // ───────────────────────────────── Airflow Particles
-    var PARTICLE_COUNT = 60;
-    var particlePositions = new Float32Array(PARTICLE_COUNT * 3);
-    var particleColors = new Float32Array(PARTICLE_COUNT * 3);
-    var particleProgress = new Float32Array(PARTICLE_COUNT);
-
-    var particleGeo = new THREE.BufferGeometry();
-    particleGeo.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
-    particleGeo.setAttribute('color', new THREE.BufferAttribute(particleColors, 3));
-
-    var particleMat = new THREE.PointsMaterial({
-      size: 0.06,
-      vertexColors: true,
-      transparent: true,
-      opacity: 0.8,
-      blending: THREE.AdditiveBlending,
-      depthWrite: false
-    });
-
-    var particles = new THREE.Points(particleGeo, particleMat);
-    particleGroup.add(particles);
-
-    // Initialize particle progress
-    for (var i = 0; i < PARTICLE_COUNT; i++) {
-      particleProgress[i] = Math.random();
-    }
-
-    // Particle path: define key points for the circuit
-    // Day: greenhouse peak → riser N (down) → pipes (N to S) → riser S (up) → floor
-    // Night: riser S (down) → pipes (S to N) → riser N (up) → greenhouse
-    var WARM_COLOR = new THREE.Color(0xf59e0b);
-    var COOL_COLOR = new THREE.Color(0x3b82f6);
-
-    function getParticlePosition(t, dayMode) {
-      // t: 0 to 1, full circuit
-      var pos = new THREE.Vector3();
-      var color = new THREE.Color();
-
-      if (dayMode) {
-        if (t < 0.15) {
-          // Rise in greenhouse (floor to peak)
-          var lt = t / 0.15;
-          pos.set(
-            (Math.sin(lt * 3) * 0.3),
-            lt * PH,
-            -HL + 0.3 + Math.cos(lt * 2) * 0.2
-          );
-          color.copy(WARM_COLOR);
-        } else if (t < 0.30) {
-          // Down riser N
-          var lt2 = (t - 0.15) / 0.15;
-          pos.set(0, PH * (1 - lt2) - lt2 * 0.8, -HL + 0.3);
-          color.lerpColors(WARM_COLOR, COOL_COLOR, lt2 * 0.3);
-        } else if (t < 0.75) {
-          // Through pipes (N to S)
-          var lt3 = (t - 0.30) / 0.45;
-          var pipeIdx = Math.floor(i % 4);
-          var layerY = (i % 8 < 4) ? -0.80 : -1.20;
-          pos.set(
-            PIPE_POSITIONS_X[pipeIdx],
-            layerY + Math.sin(lt3 * Math.PI * 4) * 0.02,
-            -HL + 0.3 + lt3 * (GL - 0.6)
-          );
-          color.lerpColors(WARM_COLOR, COOL_COLOR, 0.3 + lt3 * 0.7);
-        } else if (t < 0.90) {
-          // Up riser S
-          var lt4 = (t - 0.75) / 0.15;
-          pos.set(0, -0.8 + lt4 * 0.8, HL - 0.3);
-          color.copy(COOL_COLOR);
-        } else {
-          // Spread at floor level
-          var lt5 = (t - 0.90) / 0.10;
-          pos.set(
-            Math.sin(lt5 * Math.PI + i) * 1.5,
-            0.1 + lt5 * 0.3,
-            HL - 0.3 - lt5 * 2
-          );
-          color.lerpColors(COOL_COLOR, WARM_COLOR, lt5);
-        }
-      } else {
-        // Night mode: reverse flow
-        if (t < 0.20) {
-          // Warm air rises from soil through riser S
-          var nt = t / 0.20;
-          pos.set(0, -1.2 + nt * 1.5, HL - 0.3);
-          color.copy(WARM_COLOR);
-        } else if (t < 0.55) {
-          // Spread through greenhouse
-          var nt2 = (t - 0.20) / 0.35;
-          pos.set(
-            Math.sin(nt2 * Math.PI * 2 + i) * 1.5,
-            0.3 + nt2 * 2,
-            HL - 0.3 - nt2 * (GL - 0.6)
-          );
-          color.lerpColors(WARM_COLOR, COOL_COLOR, nt2 * 0.5);
-        } else if (t < 0.70) {
-          // Sink toward riser N
-          var nt3 = (t - 0.55) / 0.15;
-          pos.set(
-            (1 - nt3) * Math.sin(i) * 0.5,
-            PH * (1 - nt3),
-            -HL + 0.3
-          );
-          color.lerpColors(COOL_COLOR, WARM_COLOR, nt3 * 0.3);
-        } else if (t < 0.85) {
-          // Down riser N into pipes
-          var nt4 = (t - 0.70) / 0.15;
-          pos.set(0, -nt4 * 1.2, -HL + 0.3);
-          color.copy(COOL_COLOR);
-        } else {
-          // Through pipes back to S (recharging)
-          var nt5 = (t - 0.85) / 0.15;
-          var pipeIdx2 = Math.floor(i % 4);
-          var layerY2 = (i % 8 < 4) ? -0.80 : -1.20;
-          pos.set(
-            PIPE_POSITIONS_X[pipeIdx2],
-            layerY2,
-            -HL + 0.3 + nt5 * (GL - 0.6)
-          );
-          color.lerpColors(COOL_COLOR, WARM_COLOR, nt5 * 0.5);
-        }
-      }
-
-      return { pos: pos, color: color };
-    }
-
-    // ───────────────────────────────── Lighting
-    var sunLight = new THREE.DirectionalLight(0xfff4e0, 1.5);
-    sunLight.position.set(5, 10, 3);
-    sunLight.castShadow = true;
-    sunLight.shadow.mapSize.width = 1024;
-    sunLight.shadow.mapSize.height = 1024;
-    sunLight.shadow.camera.near = 0.5;
-    sunLight.shadow.camera.far = 30;
-    sunLight.shadow.camera.left = -8;
-    sunLight.shadow.camera.right = 8;
-    sunLight.shadow.camera.top = 8;
-    sunLight.shadow.camera.bottom = -8;
-    scene.add(sunLight);
-
-    var ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
-    scene.add(ambientLight);
-
-    var dayBgColor = new THREE.Color(0xe8f4fd);
-    var nightBgColor = new THREE.Color(0x0f172a);
-    var daySunColor = new THREE.Color(0xfff4e0);
-    var nightSunColor = new THREE.Color(0xc4d4ff);
-    scene.background = dayBgColor.clone();
-
-    // Stars (visible at night)
-    var starGeo = new THREE.BufferGeometry();
-    var starPositions = new Float32Array(200 * 3);
-    for (var si = 0; si < 200; si++) {
-      starPositions[si * 3] = (Math.random() - 0.5) * 80;
-      starPositions[si * 3 + 1] = 15 + Math.random() * 30;
-      starPositions[si * 3 + 2] = (Math.random() - 0.5) * 80;
-    }
-    starGeo.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
-    var starMat = new THREE.PointsMaterial({ color: 0xffffff, size: 0.15, transparent: true, opacity: 0 });
-    var stars = new THREE.Points(starGeo, starMat);
-    scene.add(stars);
-
-    // Ground plane (large)
-    var groundGeo = new THREE.PlaneGeometry(60, 60);
-    var groundMat2 = new THREE.MeshStandardMaterial({ color: 0x4a5530, roughness: 1 });
-    var ground = new THREE.Mesh(groundGeo, groundMat2);
-    ground.rotation.x = -Math.PI / 2;
-    ground.position.y = -0.01;
-    ground.receiveShadow = true;
-    scene.add(ground);
-
-    // ───────────────────────────────── Temperature Model
-    var TEMP_KEYS = [
-      { h: 0,  air: 6,  soil: 16, outside: -8, fan: false, sun: 0 },
-      { h: 4,  air: 4,  soil: 13, outside: -9, fan: false, sun: 0 },
-      { h: 6,  air: 5,  soil: 12, outside: -7, fan: false, sun: 0.1 },
-      { h: 8,  air: 25, soil: 14, outside: -5, fan: true,  sun: 0.5 },
-      { h: 10, air: 30, soil: 17, outside: -3, fan: true,  sun: 0.8 },
-      { h: 12, air: 33, soil: 20, outside: -2, fan: true,  sun: 1.0 },
-      { h: 14, air: 32, soil: 22, outside: -2, fan: true,  sun: 0.9 },
-      { h: 16, air: 28, soil: 22, outside: -3, fan: true,  sun: 0.6 },
-      { h: 18, air: 18, soil: 20, outside: -5, fan: false, sun: 0.1 },
-      { h: 20, air: 10, soil: 18, outside: -7, fan: false, sun: 0 },
-      { h: 22, air: 8,  soil: 17, outside: -8, fan: false, sun: 0 },
-      { h: 24, air: 6,  soil: 16, outside: -8, fan: false, sun: 0 }
-    ];
-
-    function lerpVal(a, b, t) { return a + (b - a) * t; }
-
-    function getSimState(hour) {
-      hour = ((hour % 24) + 24) % 24;
-      var prev = TEMP_KEYS[TEMP_KEYS.length - 1];
-      for (var ti = 0; ti < TEMP_KEYS.length; ti++) {
-        if (TEMP_KEYS[ti].h > hour) {
-          prev = ti > 0 ? TEMP_KEYS[ti - 1] : TEMP_KEYS[TEMP_KEYS.length - 1];
-          var next = TEMP_KEYS[ti];
-          var range = next.h - prev.h;
-          if (range <= 0) range += 24;
-          var elapsed = hour - prev.h;
-          if (elapsed < 0) elapsed += 24;
-          var t2 = elapsed / range;
-          return {
-            air: Math.round(lerpVal(prev.air, next.air, t2)),
-            soil: Math.round(lerpVal(prev.soil, next.soil, t2)),
-            outside: Math.round(lerpVal(prev.outside, next.outside, t2)),
-            fan: t2 < 0.5 ? prev.fan : next.fan,
-            sun: lerpVal(prev.sun, next.sun, t2)
-          };
-        }
-      }
-      var last = TEMP_KEYS[TEMP_KEYS.length - 1];
-      return { air: last.air, soil: last.soil, outside: last.outside, fan: last.fan, sun: last.sun };
-    }
-
-    // ───────────────────────────────── UI References
-    var btnDay = document.getElementById('btn-day');
-    var btnNight = document.getElementById('btn-night');
-    var timeSlider = document.getElementById('time-slider');
-    var btnCutaway = document.getElementById('btn-cutaway');
-    var btnLabels = document.getElementById('btn-labels');
-    var btnReset = document.getElementById('btn-reset');
-    var modeTitle = document.getElementById('mode-title');
-    var tempOutside = document.getElementById('temp-outside');
-    var tempGreenhouse = document.getElementById('temp-greenhouse');
-    var tempSoil = document.getElementById('temp-soil');
-    var fanStatusEl = document.getElementById('fan-status');
-    var timeDisplay = document.getElementById('time-display');
-    var tooltip = document.getElementById('tooltip');
-
-    // ───────────────────────────────── UI Events
-    btnDay.addEventListener('click', function() {
-      targetTransition = 1;
-      timeSlider.value = 12;
-      timeOfDay = 12;
-      isDay = true;
-      btnDay.style.background = '#f59e0b';
-      btnDay.style.color = '#000';
-      btnDay.classList.remove('text-white/60');
-      btnNight.style.background = 'transparent';
-      btnNight.style.color = '';
-      btnNight.classList.add('text-white/60');
-    });
-
-    btnNight.addEventListener('click', function() {
-      targetTransition = 0;
-      timeSlider.value = 0;
-      timeOfDay = 0;
-      isDay = false;
-      btnNight.style.background = '#6366f1';
-      btnNight.style.color = '#fff';
-      btnNight.classList.remove('text-white/60');
-      btnDay.style.background = 'transparent';
-      btnDay.style.color = '';
-      btnDay.classList.add('text-white/60');
-    });
-
-    timeSlider.addEventListener('input', function() {
-      timeOfDay = parseFloat(this.value);
-      var state = getSimState(timeOfDay);
-      isDay = state.sun > 0.2;
-      targetTransition = isDay ? 1 : 0;
-
-      if (isDay) {
-        btnDay.style.background = '#f59e0b';
-        btnDay.style.color = '#000';
-        btnNight.style.background = 'transparent';
-        btnNight.classList.add('text-white/60');
-      } else {
-        btnNight.style.background = '#6366f1';
-        btnNight.style.color = '#fff';
-        btnDay.style.background = 'transparent';
-        btnDay.classList.add('text-white/60');
-      }
-    });
-
-    btnCutaway.addEventListener('click', function() {
-      showCutaway = !showCutaway;
-      cutawayFillGroup.visible = !showCutaway;
-      btnCutaway.style.background = showCutaway ? '#10b981' : 'rgba(255,255,255,0.1)';
-      btnCutaway.classList.toggle('text-white/60', !showCutaway);
-    });
-
-    btnLabels.addEventListener('click', function() {
-      showLabels = !showLabels;
-      labelGroup.visible = showLabels;
-      btnLabels.style.background = showLabels ? '#10b981' : 'rgba(255,255,255,0.1)';
-      btnLabels.classList.toggle('text-white/60', !showLabels);
-    });
-
-    btnReset.addEventListener('click', function() {
-      controls.reset(defaultCamPos.clone(), defaultCamTarget.clone());
-    });
-
-    // ───────────────────────────────── Raycasting (hover + click)
-    var raycaster = new THREE.Raycaster();
-    var mouse = new THREE.Vector2();
-    var hoveredObj = null;
-
-    canvas.addEventListener('mousemove', function(e) {
-      var rect = canvas.getBoundingClientRect();
-      mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-      mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
-
-      raycaster.setFromCamera(mouse, camera);
-      var intersects = raycaster.intersectObjects(clickableObjects);
-
-      if (intersects.length > 0) {
-        var obj = intersects[0].object;
-        var compKey = componentMap[obj.id];
-        if (compKey) {
-          canvas.style.cursor = 'pointer';
-          tooltip.classList.remove('hidden');
-          tooltip.style.left = (e.clientX - canvas.getBoundingClientRect().left + 12) + 'px';
-          tooltip.style.top = (e.clientY - canvas.getBoundingClientRect().top - 10) + 'px';
-          tooltip.textContent = compKey.charAt(0).toUpperCase() + compKey.slice(1);
-
-          if (hoveredObj && hoveredObj !== obj) {
-            hoveredObj.material.emissive && hoveredObj.material.emissive.setHex(0x000000);
-          }
-          hoveredObj = obj;
-          if (obj.material.emissive) obj.material.emissive.setHex(0x333333);
-        }
-      } else {
-        canvas.style.cursor = 'grab';
-        tooltip.classList.add('hidden');
-        if (hoveredObj && hoveredObj.material.emissive) {
-          hoveredObj.material.emissive.setHex(0x000000);
-          hoveredObj = null;
-        }
-      }
-    });
-
-    canvas.addEventListener('click', function(e) {
-      raycaster.setFromCamera(mouse, camera);
-      var intersects = raycaster.intersectObjects(clickableObjects);
-      if (intersects.length > 0) {
-        var compKey = componentMap[intersects[0].object.id];
-        if (compKey) {
-          var detailEl = document.getElementById('detail-' + compKey);
-          if (detailEl) {
-            detailEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            detailEl.style.borderColor = '#10b981';
-            setTimeout(function() { detailEl.style.borderColor = ''; }, 1500);
-          }
-        }
-      }
-    });
-
-    // ───────────────────────────────── Resize
-    function onResize() {
-      var w = container.clientWidth;
-      var h = container.clientHeight;
-      camera.aspect = w / h;
-      camera.updateProjectionMatrix();
-      renderer.setSize(w, h);
-    }
-    window.addEventListener('resize', onResize);
-
-    // Also set info panel max-height on mobile
-    function updateLayout() {
-      var panel = document.getElementById('info-panel');
-      if (window.innerWidth < 1024) {
-        panel.style.maxHeight = '50vh';
-      } else {
-        panel.style.maxHeight = '70vh';
-      }
-    }
-    window.addEventListener('resize', updateLayout);
-    updateLayout();
-
-    // ───────────────────────────────── Animation Loop
-    var clock = new THREE.Clock();
-
-    function animate() {
-      requestAnimationFrame(animate);
-      var delta = clock.getDelta();
-
-      // Smooth day/night transition
-      transitionProgress += (targetTransition - transitionProgress) * Math.min(delta * 2.5, 1);
-
-      // Update background
-      scene.background.lerpColors(nightBgColor, dayBgColor, transitionProgress);
-
-      // Update sun/moon
-      sunLight.color.lerpColors(nightSunColor, daySunColor, transitionProgress);
-      sunLight.intensity = 0.15 + transitionProgress * 1.35;
-      ambientLight.intensity = 0.1 + transitionProgress * 0.25;
-
-      // Stars
-      starMat.opacity = 1 - transitionProgress;
-
-      // Temperature state
-      var state = getSimState(timeOfDay);
-
-      // Update UI
-      var hours = Math.floor(timeOfDay);
-      var mins = Math.floor((timeOfDay - hours) * 60);
-      timeDisplay.textContent = String(hours).padStart(2, '0') + ':' + String(mins).padStart(2, '0');
-
-      tempOutside.textContent = state.outside + '°C';
-      tempGreenhouse.textContent = state.air + '°C';
-      tempSoil.textContent = state.soil + '°C';
-
-      if (state.fan) {
-        fanStatusEl.textContent = 'ON';
-        fanStatusEl.style.color = '#10b981';
-      } else {
-        fanStatusEl.textContent = 'OFF';
-        fanStatusEl.style.color = '#ef4444';
-      }
-
-      if (isDay) {
-        modeTitle.innerHTML = '☀️ Storing Heat';
-        modeTitle.style.color = '#f59e0b';
-      } else {
-        modeTitle.innerHTML = '🌙 Releasing Heat';
-        modeTitle.style.color = '#818cf8';
-      }
-
-      // Soil glow
-      var soilHeat = Math.max(0, (state.soil - 10) / 15);
-      soilGlowMats.forEach(function(mat) {
-        mat.emissive = mat.emissive || new THREE.Color(0x000000);
-        mat.emissive.setRGB(soilHeat * 0.3, soilHeat * 0.1, 0);
+      const renderer = new THREE.WebGLRenderer({
+        canvas: canvasEl,
+        antialias: true,
       });
+      renderer.setSize(viewport.clientWidth, viewport.clientHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.2;
 
-      // Fan rotation
-      if (state.fan) {
-        fanAngle += delta * 8;
-        fanBladesGroup.rotation.y = fanAngle;
-      }
-
-      // Update particles
-      var speed = state.fan ? 0.15 : 0.08;
-      for (var pi = 0; pi < PARTICLE_COUNT; pi++) {
-        particleProgress[pi] = (particleProgress[pi] + delta * speed * (0.8 + Math.random() * 0.4)) % 1;
-        var result = getParticlePosition(particleProgress[pi], isDay);
-        particlePositions[pi * 3] = result.pos.x;
-        particlePositions[pi * 3 + 1] = result.pos.y;
-        particlePositions[pi * 3 + 2] = result.pos.z;
-        particleColors[pi * 3] = result.color.r;
-        particleColors[pi * 3 + 1] = result.color.g;
-        particleColors[pi * 3 + 2] = result.color.b;
-      }
-      particleGeo.attributes.position.needsUpdate = true;
-      particleGeo.attributes.color.needsUpdate = true;
-
-      // Update controls
+      const controls = new OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.08;
+      controls.minDistance = 3;
+      controls.maxDistance = 20;
+      controls.target.set(0, 0.5, 0);
+      controls.maxPolarAngle = Math.PI * 0.48;
       controls.update();
 
-      renderer.render(scene, camera);
-    }
+      const defaultCamPos = camera.position.clone();
+      const defaultTarget = controls.target.clone();
 
-    animate();
-  })();
-  </script>
-</Base>
+      // ═══════════════════════════════════════════════════════════
+      // MATERIALS
+      // ═══════════════════════════════════════════════════════════
+      const glassMat = new THREE.MeshPhysicalMaterial({
+        color: 0xffffff,
+        transparent: true,
+        opacity: 0.25,
+        roughness: 0.05,
+        metalness: 0,
+        side: THREE.DoubleSide,
+        depthWrite: false,
+      });
+      const frameMat = new THREE.MeshStandardMaterial({
+        color: 0xb0b0b0,
+        metalness: 0.8,
+        roughness: 0.3,
+      });
+      const floorMat = new THREE.MeshStandardMaterial({
+        color: 0xccccbb,
+        roughness: 0.9,
+      });
+      const pipeMat = new THREE.MeshStandardMaterial({
+        color: 0x555555,
+        roughness: 0.6,
+      });
+      const gravelMat = new THREE.MeshStandardMaterial({
+        color: 0xbbbbaa,
+        roughness: 0.85,
+      });
+      const soilMat = new THREE.MeshStandardMaterial({
+        color: 0x6b4423,
+        roughness: 0.9,
+      });
+      const deepSoilMat = new THREE.MeshStandardMaterial({
+        color: 0x4a2f15,
+        roughness: 0.95,
+      });
+      const drainGravelMat = new THREE.MeshStandardMaterial({
+        color: 0x999988,
+        roughness: 0.85,
+      });
+      const plywoodMat = new THREE.MeshStandardMaterial({
+        color: 0xc9a96e,
+        roughness: 0.7,
+      });
+      const pvcMat = new THREE.MeshStandardMaterial({
+        color: 0xdddddd,
+        roughness: 0.4,
+      });
+      const solarMat = new THREE.MeshStandardMaterial({
+        color: 0x1a3a5c,
+        metalness: 0.6,
+        roughness: 0.3,
+      });
+      const batteryMat = new THREE.MeshStandardMaterial({
+        color: 0x333333,
+        roughness: 0.5,
+      });
+      const thermostatMat = new THREE.MeshStandardMaterial({
+        color: 0xeeeeee,
+        roughness: 0.4,
+      });
+
+      // ═══════════════════════════════════════════════════════════
+      // HELPERS
+      // ═══════════════════════════════════════════════════════════
+      function addBeam(group, p1, p2, material, radius) {
+        radius = radius || 0.02;
+        const direction = new THREE.Vector3().subVectors(p2, p1);
+        const length = direction.length();
+        if (length < 0.001) return;
+        const geo = new THREE.CylinderGeometry(radius, radius, length, 6);
+        const mesh = new THREE.Mesh(geo, material);
+        mesh.position.lerpVectors(p1, p2, 0.5);
+        const up = new THREE.Vector3(0, 1, 0);
+        const dir = direction.clone().normalize();
+        if (Math.abs(up.dot(dir)) > 0.999) {
+          mesh.rotation.set(0, 0, 0);
+          if (dir.y < 0) mesh.rotation.z = Math.PI;
+        } else {
+          const quat = new THREE.Quaternion().setFromUnitVectors(up, dir);
+          mesh.quaternion.copy(quat);
+        }
+        mesh.castShadow = true;
+        group.add(mesh);
+        return mesh;
+      }
+
+      function addBox(group, sx, sy, sz, material, px, py, pz) {
+        const geo = new THREE.BoxGeometry(sx, sy, sz);
+        const mesh = new THREE.Mesh(geo, material);
+        mesh.position.set(px, py, pz);
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
+        group.add(mesh);
+        return mesh;
+      }
+
+      const v = (x, y, z) => new THREE.Vector3(x, y, z);
+
+      // ═══════════════════════════════════════════════════════════
+      // GREENHOUSE STRUCTURE
+      // ═══════════════════════════════════════════════════════════
+      const ghGroup = new THREE.Group();
+      scene.add(ghGroup);
+
+      const hw = GH.w / 2;
+      const hl = GH.l / 2;
+      const wh = GH.wallH;
+      const ph = GH.peakH;
+
+      // Floor
+      const floorGeo = new THREE.PlaneGeometry(GH.w + 1, GH.l + 1);
+      const floorMesh = new THREE.Mesh(floorGeo, floorMat);
+      floorMesh.rotation.x = -Math.PI / 2;
+      floorMesh.receiveShadow = true;
+      ghGroup.add(floorMesh);
+
+      // Greenhouse interior floor
+      const innerFloor = new THREE.Mesh(
+        new THREE.PlaneGeometry(GH.w, GH.l),
+        new THREE.MeshStandardMaterial({ color: 0xc8c0ae, roughness: 0.95 })
+      );
+      innerFloor.rotation.x = -Math.PI / 2;
+      innerFloor.position.y = 0.005;
+      innerFloor.receiveShadow = true;
+      ghGroup.add(innerFloor);
+
+      // Frame beams
+      const frameGroup = new THREE.Group();
+      ghGroup.add(frameGroup);
+
+      // Bottom edges
+      addBeam(frameGroup, v(-hw, 0, -hl), v(hw, 0, -hl), frameMat);
+      addBeam(frameGroup, v(hw, 0, -hl), v(hw, 0, hl), frameMat);
+      addBeam(frameGroup, v(hw, 0, hl), v(-hw, 0, hl), frameMat);
+      addBeam(frameGroup, v(-hw, 0, hl), v(-hw, 0, -hl), frameMat);
+
+      // Vertical corners
+      addBeam(frameGroup, v(-hw, 0, -hl), v(-hw, wh, -hl), frameMat);
+      addBeam(frameGroup, v(hw, 0, -hl), v(hw, wh, -hl), frameMat);
+      addBeam(frameGroup, v(hw, 0, hl), v(hw, wh, hl), frameMat);
+      addBeam(frameGroup, v(-hw, 0, hl), v(-hw, wh, hl), frameMat);
+
+      // Top wall edges
+      addBeam(frameGroup, v(-hw, wh, -hl), v(hw, wh, -hl), frameMat);
+      addBeam(frameGroup, v(hw, wh, -hl), v(hw, wh, hl), frameMat);
+      addBeam(frameGroup, v(hw, wh, hl), v(-hw, wh, hl), frameMat);
+      addBeam(frameGroup, v(-hw, wh, hl), v(-hw, wh, -hl), frameMat);
+
+      // Gable edges
+      addBeam(frameGroup, v(-hw, wh, -hl), v(0, ph, -hl), frameMat);
+      addBeam(frameGroup, v(hw, wh, -hl), v(0, ph, -hl), frameMat);
+      addBeam(frameGroup, v(-hw, wh, hl), v(0, ph, hl), frameMat);
+      addBeam(frameGroup, v(hw, wh, hl), v(0, ph, hl), frameMat);
+
+      // Ridge beam
+      addBeam(frameGroup, v(0, ph, -hl), v(0, ph, hl), frameMat);
+
+      // Mid-height horizontal beams (long walls)
+      const midH = wh * 0.5;
+      addBeam(frameGroup, v(-hw, midH, -hl), v(-hw, midH, hl), frameMat);
+      addBeam(frameGroup, v(hw, midH, -hl), v(hw, midH, hl), frameMat);
+
+      // Vertical mid-studs (long walls)
+      for (let z = -hl + 1.25; z < hl; z += 1.25) {
+        addBeam(frameGroup, v(-hw, 0, z), v(-hw, wh, z), frameMat, 0.015);
+        addBeam(frameGroup, v(hw, 0, z), v(hw, wh, z), frameMat, 0.015);
+      }
+      // Vertical mid-studs (short walls)
+      addBeam(frameGroup, v(-hw / 2, 0, -hl), v(-hw / 2, wh, -hl), frameMat, 0.015);
+      addBeam(frameGroup, v(hw / 2, 0, -hl), v(hw / 2, wh, -hl), frameMat, 0.015);
+      addBeam(frameGroup, v(-hw / 2, 0, hl), v(-hw / 2, wh, hl), frameMat, 0.015);
+      addBeam(frameGroup, v(hw / 2, 0, hl), v(hw / 2, wh, hl), frameMat, 0.015);
+
+      // Glass panels
+      const glassGroup = new THREE.Group();
+      ghGroup.add(glassGroup);
+
+      // South wall glass
+      const southWallGlass = new THREE.Mesh(
+        new THREE.PlaneGeometry(GH.w, wh),
+        glassMat
+      );
+      southWallGlass.position.set(0, wh / 2, -hl);
+      glassGroup.add(southWallGlass);
+
+      // South gable triangle
+      const gableShape = new THREE.Shape();
+      gableShape.moveTo(-hw, 0);
+      gableShape.lineTo(hw, 0);
+      gableShape.lineTo(0, ph - wh);
+      gableShape.closePath();
+      const gableGeo = new THREE.ShapeGeometry(gableShape);
+
+      const southGable = new THREE.Mesh(gableGeo, glassMat);
+      southGable.position.set(0, wh, -hl);
+      glassGroup.add(southGable);
+
+      // North wall glass
+      const northWallGlass = new THREE.Mesh(
+        new THREE.PlaneGeometry(GH.w, wh),
+        glassMat
+      );
+      northWallGlass.position.set(0, wh / 2, hl);
+      northWallGlass.rotation.y = Math.PI;
+      glassGroup.add(northWallGlass);
+
+      const northGable = new THREE.Mesh(gableGeo.clone(), glassMat);
+      northGable.position.set(0, wh, hl);
+      northGable.rotation.y = Math.PI;
+      glassGroup.add(northGable);
+
+      // East wall glass
+      const eastWallGlass = new THREE.Mesh(
+        new THREE.PlaneGeometry(GH.l, wh),
+        glassMat
+      );
+      eastWallGlass.position.set(hw, wh / 2, 0);
+      eastWallGlass.rotation.y = -Math.PI / 2;
+      glassGroup.add(eastWallGlass);
+
+      // West wall glass
+      const westWallGlass = new THREE.Mesh(
+        new THREE.PlaneGeometry(GH.l, wh),
+        glassMat
+      );
+      westWallGlass.position.set(-hw, wh / 2, 0);
+      westWallGlass.rotation.y = Math.PI / 2;
+      glassGroup.add(westWallGlass);
+
+      // Roof panels
+      const roofSlope = Math.sqrt(hw * hw + (ph - wh) * (ph - wh));
+      const roofAngle = Math.atan2(ph - wh, hw);
+      const roofGeo = new THREE.PlaneGeometry(roofSlope, GH.l);
+
+      const westRoof = new THREE.Mesh(roofGeo, glassMat);
+      westRoof.position.set(-hw / 2, (wh + ph) / 2, 0);
+      westRoof.rotation.z = roofAngle;
+      westRoof.rotation.order = 'ZYX';
+      glassGroup.add(westRoof);
+
+      const eastRoof = new THREE.Mesh(roofGeo.clone(), glassMat);
+      eastRoof.position.set(hw / 2, (wh + ph) / 2, 0);
+      eastRoof.rotation.z = -roofAngle;
+      eastRoof.rotation.order = 'ZYX';
+      glassGroup.add(eastRoof);
+
+      // ═══════════════════════════════════════════════════════════
+      // UNDERGROUND SYSTEM
+      // ═══════════════════════════════════════════════════════════
+      const undergroundGroup = new THREE.Group();
+      scene.add(undergroundGroup);
+      const cutawayCover = new THREE.Group();
+      scene.add(cutawayCover);
+
+      function addSoilLayer(group, yTop, yBot, material) {
+        const thickness = yTop - yBot;
+        const yCenter = (yTop + yBot) / 2;
+        addBox(group, hw, thickness, GH.l, material, hw / 2, yCenter, 0);
+        addBox(group, hw, thickness, hl, material, -hw / 2, yCenter, hl / 2);
+      }
+
+      function addSoilCover(group, yTop, yBot, material) {
+        const thickness = yTop - yBot;
+        const yCenter = (yTop + yBot) / 2;
+        addBox(group, hw, thickness, hl, material, -hw / 2, yCenter, -hl / 2);
+      }
+
+      // Soil strata
+      addSoilLayer(undergroundGroup, 0, -0.20, gravelMat);
+      addSoilCover(cutawayCover, 0, -0.20, gravelMat);
+      addSoilLayer(undergroundGroup, -0.20, -0.65, soilMat);
+      addSoilCover(cutawayCover, -0.20, -0.65, soilMat);
+      addSoilLayer(undergroundGroup, -0.65, -0.95, soilMat);
+      addSoilCover(cutawayCover, -0.65, -0.95, soilMat);
+      addSoilLayer(undergroundGroup, -0.95, -1.05, soilMat);
+      addSoilCover(cutawayCover, -0.95, -1.05, soilMat);
+      addSoilLayer(undergroundGroup, -1.05, -1.35, deepSoilMat);
+      addSoilCover(cutawayCover, -1.05, -1.35, deepSoilMat);
+      addSoilLayer(undergroundGroup, -1.35, -1.50, drainGravelMat);
+      addSoilCover(cutawayCover, -1.35, -1.50, drainGravelMat);
+      addSoilLayer(undergroundGroup, -1.50, -1.80, deepSoilMat);
+      addSoilCover(cutawayCover, -1.50, -1.80, deepSoilMat);
+
+      // Cross-section faces
+      const crossSectionMat = new THREE.MeshStandardMaterial({
+        color: 0x5a3a1a, roughness: 0.9, side: THREE.DoubleSide,
+      });
+      const crossFront = new THREE.Mesh(new THREE.PlaneGeometry(hw, 1.80), crossSectionMat);
+      crossFront.position.set(-hw / 2, -0.9, 0);
+      undergroundGroup.add(crossFront);
+      const crossSide = new THREE.Mesh(new THREE.PlaneGeometry(hl, 1.80), crossSectionMat);
+      crossSide.position.set(0, -0.9, -hl / 2);
+      crossSide.rotation.y = Math.PI / 2;
+      undergroundGroup.add(crossSide);
+
+      // Pipes
+      const pipesGroup = new THREE.Group();
+      undergroundGroup.add(pipesGroup);
+      for (const layerY of PIPE_LAYERS) {
+        for (const px of PIPE_XS) {
+          const pipeGeo = new THREE.CylinderGeometry(PIPE_RADIUS, PIPE_RADIUS, GH.l - 0.4, 12);
+          pipeGeo.rotateX(Math.PI / 2);
+          const pipe = new THREE.Mesh(pipeGeo, pipeMat);
+          pipe.position.set(px, layerY, 0);
+          pipe.userData = { type: 'pipe' };
+          pipesGroup.add(pipe);
+        }
+      }
+
+      // Manifold boxes
+      const manifoldN = addBox(undergroundGroup, 0.6, 0.3, 0.4, plywoodMat, 0, -0.95, hl - 0.35);
+      manifoldN.userData = { type: 'manifold' };
+      const manifoldS = addBox(undergroundGroup, 0.6, 0.3, 0.4, plywoodMat, 0, -0.95, -hl + 0.35);
+      manifoldS.userData = { type: 'manifold' };
+
+      // Risers
+      const riserGeo = new THREE.CylinderGeometry(PIPE_RADIUS, PIPE_RADIUS, 1.2, 12);
+      const riserA = new THREE.Mesh(riserGeo, pvcMat);
+      riserA.position.set(RISER_X, -0.35, RISER_NORTH_Z);
+      riserA.userData = { type: 'riser' };
+      undergroundGroup.add(riserA);
+      const riserB = new THREE.Mesh(riserGeo.clone(), pvcMat);
+      riserB.position.set(RISER_X, -0.35, RISER_SOUTH_Z);
+      riserB.userData = { type: 'riser' };
+      undergroundGroup.add(riserB);
+
+      // Riser caps above ground
+      const riserCapGeo = new THREE.CylinderGeometry(PIPE_RADIUS + 0.01, PIPE_RADIUS + 0.01, 0.3, 12);
+      const riserCapA = new THREE.Mesh(riserCapGeo, pvcMat);
+      riserCapA.position.set(RISER_X, 0.15, RISER_NORTH_Z);
+      ghGroup.add(riserCapA);
+      const riserCapB = new THREE.Mesh(riserCapGeo.clone(), pvcMat);
+      riserCapB.position.set(RISER_X, 0.15, RISER_SOUTH_Z);
+      ghGroup.add(riserCapB);
+
+      // ═══════════════════════════════════════════════════════════
+      // COMPONENTS
+      // ═══════════════════════════════════════════════════════════
+
+      // Fan
+      const fanGroup = new THREE.Group();
+      fanGroup.position.set(RISER_X, 0.4, RISER_NORTH_Z);
+      ghGroup.add(fanGroup);
+      const fanHousing = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.08, 0.08, 0.12, 16),
+        new THREE.MeshStandardMaterial({ color: 0x444444, metalness: 0.5 })
+      );
+      fanGroup.add(fanHousing);
+      const fanBladesGroup = new THREE.Group();
+      fanGroup.add(fanBladesGroup);
+      for (let i = 0; i < 4; i++) {
+        const blade = new THREE.Mesh(
+          new THREE.BoxGeometry(0.06, 0.01, 0.015),
+          new THREE.MeshStandardMaterial({ color: 0x888888, metalness: 0.6 })
+        );
+        blade.position.x = 0.03;
+        const pivot = new THREE.Group();
+        pivot.add(blade);
+        pivot.rotation.y = (i * Math.PI) / 2;
+        fanBladesGroup.add(pivot);
+      }
+      fanGroup.userData = { type: 'fan' };
+
+      // Solar panel
+      const solarPanel = new THREE.Mesh(
+        new THREE.BoxGeometry(0.8, 0.03, 1.2),
+        solarMat
+      );
+      const solarY = (wh + ph) / 2 + 0.15;
+      solarPanel.position.set(hw * 0.4, solarY, 0);
+      solarPanel.rotation.z = -roofAngle;
+      solarPanel.userData = { type: 'solar' };
+      ghGroup.add(solarPanel);
+
+      // Battery
+      const battery = addBox(ghGroup, 0.25, 0.2, 0.15, batteryMat, hw - 0.2, 0.1, hl - 0.3);
+      battery.userData = { type: 'battery' };
+
+      // Thermostat
+      const thermostat = addBox(ghGroup, 0.06, 0.06, 0.03, thermostatMat, RISER_X + 0.1, 0.35, RISER_NORTH_Z);
+      thermostat.userData = { type: 'thermostat' };
+
+      // ═══════════════════════════════════════════════════════════
+      // SOIL GLOW
+      // ═══════════════════════════════════════════════════════════
+      const soilGlow = new THREE.PointLight(0xff6600, 0, 2);
+      soilGlow.position.set(0, -0.9, 0);
+      undergroundGroup.add(soilGlow);
+
+      // ═══════════════════════════════════════════════════════════
+      // PARTICLE SYSTEM
+      // ═══════════════════════════════════════════════════════════
+      const particlePaths = [];
+      for (let li = 0; li < PIPE_LAYERS.length; li++) {
+        const layerY = PIPE_LAYERS[li];
+        for (let pi = 0; pi < PIPE_XS.length; pi++) {
+          const px = PIPE_XS[pi];
+          particlePaths.push(new THREE.CatmullRomCurve3([
+            v(px * 0.4, 2.2, -0.5),
+            v(px * 0.2, 2.5, 0.5),
+            v(0.1, 1.8, 1.5),
+            v(0, 0.5, RISER_NORTH_Z),
+            v(0, 0.0, RISER_NORTH_Z),
+            v(0, layerY + 0.2, RISER_NORTH_Z),
+            v(px * 0.5, layerY, RISER_NORTH_Z - 0.5),
+            v(px, layerY, hl * 0.5),
+            v(px, layerY, 0),
+            v(px, layerY, -hl * 0.5),
+            v(px * 0.5, layerY, RISER_SOUTH_Z + 0.5),
+            v(0, layerY + 0.2, RISER_SOUTH_Z),
+            v(0, 0.0, RISER_SOUTH_Z),
+            v(0, 0.5, RISER_SOUTH_Z),
+            v(px * 0.3, 1.2, -1.5),
+            v(px * 0.5, 1.8, -0.8),
+          ], true));
+        }
+      }
+
+      const particlePositions = new Float32Array(PARTICLE_COUNT * 3);
+      const particleColors = new Float32Array(PARTICLE_COUNT * 3);
+      const particleProgress = new Float32Array(PARTICLE_COUNT);
+      const particlePathIndex = new Uint8Array(PARTICLE_COUNT);
+      const particleSpeeds = new Float32Array(PARTICLE_COUNT);
+
+      for (let i = 0; i < PARTICLE_COUNT; i++) {
+        particleProgress[i] = Math.random();
+        particlePathIndex[i] = Math.floor(Math.random() * particlePaths.length);
+        particleSpeeds[i] = 0.15 + Math.random() * 0.1;
+      }
+
+      const particleGeo = new THREE.BufferGeometry();
+      particleGeo.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
+      particleGeo.setAttribute('color', new THREE.BufferAttribute(particleColors, 3));
+
+      const particleMat = new THREE.PointsMaterial({
+        size: 0.08,
+        vertexColors: true,
+        transparent: true,
+        opacity: 0.85,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+        sizeAttenuation: true,
+      });
+
+      const particles = new THREE.Points(particleGeo, particleMat);
+      scene.add(particles);
+
+      const warmColor = new THREE.Color(0xF59E0B);
+      const coolColor = new THREE.Color(0x3B82F6);
+      const tempColor = new THREE.Color();
+
+      // ═══════════════════════════════════════════════════════════
+      // LIGHTING
+      // ═══════════════════════════════════════════════════════════
+      const sunLight = new THREE.DirectionalLight(0xFFF4E0, 2.0);
+      sunLight.position.set(4, 8, -3);
+      sunLight.castShadow = true;
+      sunLight.shadow.mapSize.width = 1024;
+      sunLight.shadow.mapSize.height = 1024;
+      sunLight.shadow.camera.near = 0.5;
+      sunLight.shadow.camera.far = 20;
+      sunLight.shadow.camera.left = -6;
+      sunLight.shadow.camera.right = 6;
+      sunLight.shadow.camera.top = 6;
+      sunLight.shadow.camera.bottom = -6;
+      scene.add(sunLight);
+
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+      scene.add(ambientLight);
+      const hemiLight = new THREE.HemisphereLight(0xE8F4FD, 0x78552B, 0.3);
+      scene.add(hemiLight);
+
+      // Stars
+      const starsGeo = new THREE.BufferGeometry();
+      const starPositions = new Float32Array(200 * 3);
+      for (let i = 0; i < 200; i++) {
+        const theta = Math.random() * Math.PI * 2;
+        const phi = Math.random() * Math.PI * 0.5;
+        const r = 40;
+        starPositions[i * 3] = r * Math.sin(phi) * Math.cos(theta);
+        starPositions[i * 3 + 1] = r * Math.cos(phi);
+        starPositions[i * 3 + 2] = r * Math.sin(phi) * Math.sin(theta);
+      }
+      starsGeo.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
+      const starsMat = new THREE.PointsMaterial({ color: 0xffffff, size: 0.15, transparent: true, opacity: 0 });
+      const stars = new THREE.Points(starsGeo, starsMat);
+      scene.add(stars);
+
+      // ═══════════════════════════════════════════════════════════
+      // LABELS
+      // ═══════════════════════════════════════════════════════════
+      const labelsContainer = document.getElementById('labels-container');
+      const labelDefs = [
+        { text: 'Riser A (Fan)', pos: v(RISER_X, 0.65, RISER_NORTH_Z), detail: 'detail-fan' },
+        { text: 'Riser B', pos: v(RISER_X, 0.65, RISER_SOUTH_Z), detail: 'detail-risers' },
+        { text: 'Solar Panel', pos: v(hw * 0.4, solarY + 0.2, 0), detail: 'detail-solar' },
+        { text: 'Battery', pos: v(hw - 0.2, 0.35, hl - 0.3), detail: 'detail-battery' },
+        { text: 'Thermostat', pos: v(RISER_X + 0.1, 0.55, RISER_NORTH_Z), detail: 'detail-thermostat' },
+        { text: 'Manifold N', pos: v(0, -0.65, hl - 0.35), detail: 'detail-manifold' },
+        { text: 'Manifold S', pos: v(0, -0.65, -hl + 0.35), detail: 'detail-manifold' },
+        { text: 'Pipe Layer 1', pos: v(-0.5, -0.8, 0), detail: 'detail-pipes' },
+        { text: 'Pipe Layer 2', pos: v(0.5, -1.2, 0), detail: 'detail-pipes' },
+      ];
+
+      const labelEls = [];
+      const isDarkMode = document.documentElement.classList.contains('dark');
+      for (const def of labelDefs) {
+        const el = document.createElement('div');
+        el.className = 'label-3d';
+        el.textContent = def.text;
+        el.style.background = isDarkMode ? 'rgba(250,250,250,0.9)' : 'rgba(0,0,0,0.8)';
+        el.style.color = isDarkMode ? '#0A0A0A' : '#FAFAFA';
+        labelsContainer.appendChild(el);
+        labelEls.push({ el, pos: def.pos, detail: def.detail });
+      }
+
+      function updateLabels() {
+        if (!showLabels) {
+          for (const l of labelEls) l.el.style.display = 'none';
+          return;
+        }
+        const w = viewport.clientWidth;
+        const h = viewport.clientHeight;
+        for (const l of labelEls) {
+          const projected = l.pos.clone().project(camera);
+          const x = (projected.x * 0.5 + 0.5) * w;
+          const y = (-projected.y * 0.5 + 0.5) * h;
+          if (projected.z > 1 || x < -50 || x > w + 50 || y < -50 || y > h + 50) {
+            l.el.style.display = 'none';
+          } else {
+            l.el.style.display = 'block';
+            l.el.style.left = x + 'px';
+            l.el.style.top = y + 'px';
+          }
+        }
+      }
+
+      // ═══════════════════════════════════════════════════════════
+      // TEMPERATURE MODEL
+      // ═══════════════════════════════════════════════════════════
+      function getTemps(minutes) {
+        let i = 0;
+        for (; i < TEMP_DATA.length - 1; i++) {
+          if (TEMP_DATA[i + 1][0] >= minutes) break;
+        }
+        const a = TEMP_DATA[i];
+        const b = TEMP_DATA[Math.min(i + 1, TEMP_DATA.length - 1)];
+        const range = b[0] - a[0];
+        const t = range > 0 ? (minutes - a[0]) / range : 0;
+        return {
+          outside: a[1] + (b[1] - a[1]) * t,
+          greenhouse: a[2] + (b[2] - a[2]) * t,
+          soil: a[3] + (b[3] - a[3]) * t,
+          fanOn: minutes >= 480 && minutes <= 1020 && a[4],
+        };
+      }
+
+      // ═══════════════════════════════════════════════════════════
+      // DAY / NIGHT TRANSITION
+      // ═══════════════════════════════════════════════════════════
+      const dayBgColor = new THREE.Color(DAY_BG);
+      const nightBgColor = new THREE.Color(NIGHT_BG);
+      const daySunColor = new THREE.Color(0xFFF4E0);
+      const nightSunColor = new THREE.Color(0xC4D4FF);
+
+      function updateDayNight(dt) {
+        if (transitioning) {
+          const speed = 1.0 / 1.5;
+          if (transitionTarget === 1) {
+            transitionProgress = Math.min(1, transitionProgress + speed * dt);
+            if (transitionProgress >= 1) transitioning = false;
+          } else {
+            transitionProgress = Math.max(0, transitionProgress - speed * dt);
+            if (transitionProgress <= 0) transitioning = false;
+          }
+        }
+        const t = transitionProgress;
+        scene.background.copy(dayBgColor).lerp(nightBgColor, 1 - t);
+        sunLight.color.copy(daySunColor).lerp(nightSunColor, 1 - t);
+        sunLight.intensity = 0.3 + t * 1.7;
+        ambientLight.intensity = 0.15 + t * 0.25;
+        hemiLight.intensity = 0.1 + t * 0.2;
+        starsMat.opacity = 1 - t;
+      }
+
+      function setMode(day) {
+        isDay = day;
+        transitioning = true;
+        transitionTarget = day ? 1 : 0;
+        document.getElementById('btn-day').classList.toggle('active', day);
+        document.getElementById('btn-night').classList.toggle('active', !day);
+        if (day) {
+          timeMinutes = 720;
+          document.getElementById('time-slider').value = 720;
+        } else {
+          timeMinutes = 1320;
+          document.getElementById('time-slider').value = 1320;
+        }
+        updateUI();
+      }
+
+      // ═══════════════════════════════════════════════════════════
+      // UI UPDATES
+      // ═══════════════════════════════════════════════════════════
+      function updateUI() {
+        const temps = getTemps(timeMinutes);
+        const hours = Math.floor(timeMinutes / 60);
+        const mins = Math.floor(timeMinutes % 60);
+        document.getElementById('time-display').textContent =
+          String(hours).padStart(2, '0') + ':' + String(mins).padStart(2, '0');
+        document.getElementById('temp-outside').textContent = Math.round(temps.outside) + '°C';
+        document.getElementById('temp-greenhouse').textContent = Math.round(temps.greenhouse) + '°C';
+        document.getElementById('temp-soil').textContent = Math.round(temps.soil) + '°C';
+        document.getElementById('fan-status').textContent = temps.fanOn ? 'ON' : 'OFF';
+        document.getElementById('fan-status').style.color = temps.fanOn ? '#10B981' : 'var(--color-muted)';
+
+        const isSunUp = timeMinutes >= 360 && timeMinutes <= 1080;
+        document.getElementById('mode-title').textContent = isSunUp ? 'Storing Heat' : 'Releasing Heat';
+
+        const soilHeat = (temps.soil - 10) / 15;
+        soilGlow.intensity = Math.max(0, soilHeat) * 1.5;
+
+        const ghTempEl = document.getElementById('temp-greenhouse');
+        if (temps.greenhouse > 20) {
+          ghTempEl.style.color = '#F59E0B';
+        } else if (temps.greenhouse > 10) {
+          ghTempEl.style.color = '#10B981';
+        } else {
+          ghTempEl.style.color = '#3B82F6';
+        }
+      }
+
+      // ═══════════════════════════════════════════════════════════
+      // ANIMATION LOOP
+      // ═══════════════════════════════════════════════════════════
+      let prevTime = performance.now();
+
+      function animate() {
+        requestAnimationFrame(animate);
+        const now = performance.now();
+        const dt = Math.min((now - prevTime) / 1000, 0.1);
+        prevTime = now;
+
+        controls.update();
+        updateDayNight(dt);
+
+        const currentTemps = getTemps(timeMinutes);
+
+        // Fan rotation
+        if (currentTemps.fanOn) {
+          fanBladesGroup.rotation.y += dt * 8;
+        }
+
+        // Particles
+        const direction = isDay ? 1 : -1;
+        const speed = currentTemps.fanOn ? 1.0 : 0.4;
+        for (let i = 0; i < PARTICLE_COUNT; i++) {
+          particleProgress[i] += direction * particleSpeeds[i] * speed * dt;
+          if (particleProgress[i] > 1) particleProgress[i] -= 1;
+          if (particleProgress[i] < 0) particleProgress[i] += 1;
+
+          const path = particlePaths[particlePathIndex[i]];
+          const point = path.getPointAt(particleProgress[i]);
+          particlePositions[i * 3] = point.x;
+          particlePositions[i * 3 + 1] = point.y;
+          particlePositions[i * 3 + 2] = point.z;
+
+          const prog = particleProgress[i];
+          let colorMix;
+          if (isDay) {
+            colorMix = prog < 0.3 ? 1 - prog / 0.3 : prog > 0.7 ? (prog - 0.7) / 0.3 : 0;
+          } else {
+            colorMix = prog > 0.3 && prog < 0.7 ? (prog - 0.3) / 0.4 : prog <= 0.3 ? 0 : 1 - (prog - 0.7) / 0.3;
+          }
+          tempColor.copy(coolColor).lerp(warmColor, Math.max(0, Math.min(1, colorMix)));
+          particleColors[i * 3] = tempColor.r;
+          particleColors[i * 3 + 1] = tempColor.g;
+          particleColors[i * 3 + 2] = tempColor.b;
+        }
+        particleGeo.attributes.position.needsUpdate = true;
+        particleGeo.attributes.color.needsUpdate = true;
+
+        updateLabels();
+        renderer.render(scene, camera);
+      }
+
+      // ═══════════════════════════════════════════════════════════
+      // EVENT HANDLERS
+      // ═══════════════════════════════════════════════════════════
+      document.getElementById('btn-day').addEventListener('click', () => setMode(true));
+      document.getElementById('btn-night').addEventListener('click', () => setMode(false));
+
+      document.getElementById('time-slider').addEventListener('input', (e) => {
+        timeMinutes = parseInt(e.target.value);
+        const isSunUp = timeMinutes >= 360 && timeMinutes <= 1080;
+        if (isSunUp !== isDay) {
+          isDay = isSunUp;
+          transitioning = true;
+          transitionTarget = isSunUp ? 1 : 0;
+          document.getElementById('btn-day').classList.toggle('active', isSunUp);
+          document.getElementById('btn-night').classList.toggle('active', !isSunUp);
+        }
+        updateUI();
+      });
+
+      document.getElementById('btn-cutaway').addEventListener('click', () => {
+        showCutaway = !showCutaway;
+        cutawayCover.visible = !showCutaway;
+        document.getElementById('btn-cutaway').classList.toggle('active', showCutaway);
+      });
+
+      document.getElementById('btn-labels').addEventListener('click', () => {
+        showLabels = !showLabels;
+        document.getElementById('btn-labels').classList.toggle('active', showLabels);
+      });
+
+      document.getElementById('btn-reset').addEventListener('click', () => {
+        camera.position.copy(defaultCamPos);
+        controls.target.copy(defaultTarget);
+        controls.update();
+      });
+
+      // Resize
+      function onResize() {
+        const w = viewport.clientWidth;
+        const h = viewport.clientHeight;
+        camera.aspect = w / h;
+        camera.updateProjectionMatrix();
+        renderer.setSize(w, h);
+      }
+      window.addEventListener('resize', onResize);
+      new ResizeObserver(onResize).observe(viewport);
+
+      // Raycasting
+      const raycaster = new THREE.Raycaster();
+      const mouse = new THREE.Vector2();
+      let hoveredObject = null;
+
+      canvasEl.addEventListener('pointermove', (e) => {
+        const rect = canvasEl.getBoundingClientRect();
+        mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+        mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+        raycaster.setFromCamera(mouse, camera);
+        const meshes = [];
+        scene.traverse((obj) => { if (obj.isMesh && obj.userData.type) meshes.push(obj); });
+        const intersects = raycaster.intersectObjects(meshes);
+        hoveredObject = null;
+        canvasEl.style.cursor = 'grab';
+        if (intersects.length > 0) {
+          hoveredObject = intersects[0].object;
+          canvasEl.style.cursor = 'pointer';
+        }
+      });
+
+      canvasEl.addEventListener('click', () => {
+        if (!hoveredObject || !hoveredObject.userData.type) return;
+        const typeMap = {
+          pipe: 'detail-pipes', manifold: 'detail-manifold', fan: 'detail-fan',
+          solar: 'detail-solar', battery: 'detail-battery',
+          thermostat: 'detail-thermostat', riser: 'detail-risers',
+        };
+        const detailId = typeMap[hoveredObject.userData.type];
+        if (detailId) {
+          const detail = document.getElementById(detailId);
+          if (detail) {
+            detail.open = true;
+            detail.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }
+        }
+      });
+
+      // ═══════════════════════════════════════════════════════════
+      // INIT
+      // ═══════════════════════════════════════════════════════════
+      cutawayCover.visible = false;
+      updateUI();
+      animate();
+    </script>
+  </body>
+</html>
